@@ -41,7 +41,7 @@ export class Login extends Component<Props, State> {
                     style={style.input}
                     autoFocus
                     underlineColorAndroid={this.state.userInvalid ? 'red' : '#008030'}
-                    placeholder='usuário'                    
+                    placeholder='Usuário'                    
                     placeholderTextColor={this.state.userInvalid ? 'red' : '#008030'}
                     onChangeText={(text: string) => this.setState({ username: text })}
                     onChange={() => this.setState({userInvalid: false})}
@@ -50,7 +50,7 @@ export class Login extends Component<Props, State> {
                     value={this.state.password}
                     style={style.input}                    
                     underlineColorAndroid={this.state.userInvalid ? 'red' : '#008030'}
-                    placeholder='senha'
+                    placeholder='Senha'
                     placeholderTextColor={this.state.userInvalid ? 'red' : '#008030'}
                     secureTextEntry={true}                    
                     onChangeText={(text: string) => this.setState({ password: text })}
@@ -72,7 +72,7 @@ const style = StyleSheet.create({
         flex: 1,
         flexDirection: 'column',
         alignItems: 'center',
-        justifyContent: 'center',
+        justifyContent: 'center'
     },
     logo: {
         width: 300,
@@ -96,6 +96,8 @@ const style = StyleSheet.create({
         marginVertical: 10,
         width: 100,
         height: 50,
+        justifyContent: 'center',
+        alignItems: 'center'
         
     },
     textButton: {
