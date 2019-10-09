@@ -4,7 +4,8 @@ import { TextInputMask } from 'react-native-masked-text';
 import { NavigationScreenProp, NavigationState, NavigationParams } from 'react-navigation';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { If } from '../commons';
-import { Icon } from 'react-native-elements'
+import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
+import { faCalendarAlt } from '@fortawesome/free-regular-svg-icons'
 
 interface Props {
     navigation: NavigationScreenProp<NavigationState, NavigationParams>;
@@ -92,9 +93,10 @@ export class Register extends Component<Props, State> {
                     style={style.textInput}
                     value={cnpj}
                     underlineColorAndroid={invalidCnpj ? 'red' : '#008030'}
-                    placeholder={invalidRazaoSocial ? 'CNPJ não informado' : 'Informe o CNPJ'}
-                    placeholderTextColor={invalidRazaoSocial ? 'red' : '#008030'}
+                    placeholder={invalidCnpj ? 'CNPJ não informado' : 'Informe o CNPJ'}
+                    placeholderTextColor={invalidCnpj ? 'red' : '#008030'}
                     onChangeText={text => this.setState({ cnpj: text })}
+                    onChange={() => this.setState({ invalidCnpj: false })}
                 />
                 <TextInput
                     style={style.textInput}
@@ -103,6 +105,7 @@ export class Register extends Component<Props, State> {
                     placeholder={invalidRazaoSocial ? 'Razão social não informada' : 'Informe a razão social'}
                     placeholderTextColor={invalidRazaoSocial ? 'red' : '#008030'}
                     onChangeText={text => this.setState({ razaoSocial: text })}
+                    onChange={() => this.setState({ invalidRazaoSocial: false })}
                 />
                 <TextInput
                     style={style.textInput}
@@ -111,17 +114,18 @@ export class Register extends Component<Props, State> {
                     placeholder={invalidSetor ? 'Setor não informado' : 'Informe o setor'}
                     placeholderTextColor={invalidCnpj ? 'red' : '#008030'}
                     onChangeText={text => this.setState({ setor: text })}
+                    onChange={() => this.setState({ invalidSetor: false })}
                 />
-                <Icon
-                    name='calendar'
-                    type='evilicon'
-                    color='#008030'
+                <FontAwesomeIcon
+                    icon={faCalendarAlt}
+                    style={style.calendar}
+                    color='green'
                     size={60}
                     onPress={() => this.openDatePicker()}
-                />
+                />                
                 <TextInput
                     style={style.textInput}
-                    value={dateQuestion.date.getMonth() + 1 + '/' + dateQuestion.date.getFullYear()}
+                    value={dateQuestion.date.getMonth() + 1 + '/' + dateQuestion.date.getFullYear() + ' - Data do questionário '}
                     underlineColorAndroid='#008030'
                     placeholder='Selecione a data'
                     editable={true}
@@ -148,23 +152,30 @@ const style = StyleSheet.create({
     screen: {
         flex: 1,
         flexDirection: 'column',
+        alignSelf: 'center',
         margin: 10
     },
     textInput: {
+        flex: 1,
+        alignSelf: 'center',
+        width: 320,
         marginHorizontal: 40,
         marginVertical: 10
     },
+    calendar: {
+        alignSelf: 'center',        
+    },
     button: {
+        flex: 1,
         backgroundColor: '#008030',
         paddingBottom: 10,
         paddingTop: 5,
         borderRadius: 10,
         shadowOpacity: 0.9,
         marginVertical: 10,
-        marginHorizontal: 110,
+        alignSelf: 'center',
         width: 120,
-        height: 40,
-
+        height: 40
     },
     textButton: {
         color: 'white',

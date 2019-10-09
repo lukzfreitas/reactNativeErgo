@@ -75,11 +75,12 @@ const style = StyleSheet.create({
         justifyContent: 'center'
     },
     logo: {
+        alignSelf: 'center',        
         width: 300,
         height: 100,
         resizeMode: 'stretch',
         padding: 10,
-        margin: 10
+        margin: 10        
     },
     input: {
         width: 300,
