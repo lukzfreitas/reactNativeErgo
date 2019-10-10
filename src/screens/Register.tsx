@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { StyleSheet, TextInput, ScrollView, TouchableOpacity, Text } from 'react-native';
+import { StyleSheet, TextInput, ScrollView, TouchableOpacity, Text, Dimensions } from 'react-native';
 import { TextInputMask } from 'react-native-masked-text';
 import { NavigationScreenProp, NavigationState, NavigationParams } from 'react-navigation';
 import DateTimePicker from '@react-native-community/datetimepicker';
@@ -19,12 +19,17 @@ interface State {
     setor: string;
     invalidSetor: boolean;
     dateQuestion: any;
+    portrait: boolean;
 }
 
 export class Register extends Component<Props, State> {
 
     constructor(props: Props) {
         super(props);
+        const isPortrait = () => {
+            const dim = Dimensions.get('screen');
+            return dim.height >= dim.width;
+        };
         this.state = {
             cnpj: '',
             invalidCnpj: false,
@@ -32,9 +37,19 @@ export class Register extends Component<Props, State> {
             invalidRazaoSocial: false,
             setor: '',
             invalidSetor: false,
-            dateQuestion: { date: new Date(), mode: 'date', show: false }
+            dateQuestion: { date: new Date(), mode: 'date', show: false },
+            portrait: isPortrait()
         };
+
+        // Event Listener for orientation changes
+        Dimensions.addEventListener('change', () => {
+            this.setState({
+                portrait: isPortrait()
+            });
+        });
     }
+
+
 
     validForm = () => {
         let invalid: boolean = false;
@@ -85,12 +100,12 @@ export class Register extends Component<Props, State> {
     }
 
     render() {
-        const { cnpj, invalidCnpj, razaoSocial, invalidRazaoSocial, setor, invalidSetor, dateQuestion } = this.state;
+        const { cnpj, invalidCnpj, razaoSocial, invalidRazaoSocial, setor, invalidSetor, dateQuestion, portrait } = this.state;
         return (
             <ScrollView style={style.screen}>
                 <TextInputMask
                     type={'cnpj'}
-                    style={style.textInput}
+                    style={portrait ? style.textInput : style.textInputLandscape}
                     value={cnpj}
                     underlineColorAndroid={invalidCnpj ? 'red' : '#008030'}
                     placeholder={invalidCnpj ? 'CNPJ não informado' : 'Informe o CNPJ'}
@@ -99,7 +114,7 @@ export class Register extends Component<Props, State> {
                     onChange={() => this.setState({ invalidCnpj: false })}
                 />
                 <TextInput
-                    style={style.textInput}
+                    style={portrait ? style.textInput : style.textInputLandscape}
                     value={razaoSocial}
                     underlineColorAndroid={invalidRazaoSocial ? 'red' : '#008030'}
                     placeholder={invalidRazaoSocial ? 'Razão social não informada' : 'Informe a razão social'}
@@ -108,7 +123,7 @@ export class Register extends Component<Props, State> {
                     onChange={() => this.setState({ invalidRazaoSocial: false })}
                 />
                 <TextInput
-                    style={style.textInput}
+                    style={portrait ? style.textInput : style.textInputLandscape}
                     value={setor}
                     underlineColorAndroid={invalidSetor ? 'red' : '#008030'}
                     placeholder={invalidSetor ? 'Setor não informado' : 'Informe o setor'}
@@ -122,9 +137,9 @@ export class Register extends Component<Props, State> {
                     color='green'
                     size={60}
                     onPress={() => this.openDatePicker()}
-                />                
+                />
                 <TextInput
-                    style={style.textInput}
+                    style={portrait ? style.textInput : style.textInputLandscape}
                     value={dateQuestion.date.getMonth() + 1 + '/' + dateQuestion.date.getFullYear() + ' - Data do questionário '}
                     underlineColorAndroid='#008030'
                     placeholder='Selecione a data'
@@ -152,18 +167,22 @@ const style = StyleSheet.create({
     screen: {
         flex: 1,
         flexDirection: 'column',
-        alignSelf: 'center',
-        margin: 10
+        alignSelf: 'center'
     },
     textInput: {
         flex: 1,
         alignSelf: 'center',
         width: 320,
-        marginHorizontal: 40,
+        marginVertical: 10
+    },
+    textInputLandscape: {
+        flex: 1,
+        alignSelf: 'center',
+        width: 500,
         marginVertical: 10
     },
     calendar: {
-        alignSelf: 'center',        
+        alignSelf: 'center',
     },
     button: {
         flex: 1,
@@ -182,10 +201,6 @@ const style = StyleSheet.create({
         textAlignVertical: 'center',
         textAlign: 'center',
         fontSize: 20
-    },
-    messageError: {
-        color: 'red',
-        marginHorizontal: 40,
     }
 })
 

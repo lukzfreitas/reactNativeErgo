@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { View, TextInput, StyleSheet, Image, TouchableOpacity, Text } from 'react-native';
+import { View, TextInput, StyleSheet, Image, TouchableOpacity, Text, Dimensions } from 'react-native';
 import { NavigationScreenProp, NavigationState, NavigationParams } from 'react-navigation';
 import { If } from '../commons';
 
