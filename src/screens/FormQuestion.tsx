@@ -11,7 +11,7 @@ interface State {
     questionsId: number[];
     questionsIdSelected: number[];
     count: number;
-    eventEmitter: any;    
+    eventEmitter: any;
 }
 
 const questions: any[] = require('../assets/questions.json').data;
@@ -19,14 +19,14 @@ const questions: any[] = require('../assets/questions.json').data;
 export class FormQuestion extends Component<Props, State> {
 
     constructor(props: Props) {
-        super(props);        
+        super(props);
         this.state = {
             questionsId: [],
             questionsIdSelected: [],
             count: 0,
-            eventEmitter: null            
-        };        
-    }    
+            eventEmitter: null
+        };
+    }
 
     componentDidMount() {
         let questionsId = questions.map((question: any) => {
@@ -36,6 +36,19 @@ export class FormQuestion extends Component<Props, State> {
     }
 
     componentWillUnmount() {
+        // console.log(this.state.questionsIdSelected.length);
+        // if (this.state.questionsIdSelected.length == 0) {
+            
+        // } else {
+        //     Alert.alert(
+        //         'Atenção',
+        //         'As questões respondidas não serão salvas ao sair, você realmente deseja sair?',
+        //         [
+        //             { text: 'Sair', onPress: () => this.state.eventEmitter.remove() },
+        //             { text: 'Cancelar', onPress: () => console.log('cancelado') }
+        //         ]
+        //     );
+        // }
         this.state.eventEmitter.remove();
     }
 
@@ -45,20 +58,23 @@ export class FormQuestion extends Component<Props, State> {
         console.log(this.state.questionsIdSelected);
     }
 
-    saveQuestions = () => {        
+    saveQuestions = () => {
         let questionsNotSelected = this.state.questionsId.filter((i) => {
-            return this.state.questionsIdSelected.indexOf(i) < 0
+            return this.state.questionsIdSelected.indexOf(i) < 0;
+        }).map((i) => {
+            return "Questões: " + i;
         });
 
-        
+        console.log(questionsNotSelected);
+
         Alert.alert(
             'Questões abaixo não foram respondidas',
-            'teste1' + '\n' + 'teste2'
+            questionsNotSelected.slice(0, 10).join("\n")
         )
     }
 
 
-    render() {        
+    render() {
         return (
             <View style={style.screen}>
                 <View style={style.contentList}>
@@ -90,12 +106,12 @@ const style = StyleSheet.create({
     contentList: {
         flex: 9
     },
-    footer: {        
-        backgroundColor: 'transparent',        
-        shadowOpacity: 0.8,        
-        borderColor: 'black',        
+    footer: {
+        backgroundColor: 'transparent',
+        shadowOpacity: 0.8,
+        borderColor: 'black',
         elevation: 50
-    },    
+    },
     button: {
         shadowOpacity: 0.9,
         alignSelf: 'center',
