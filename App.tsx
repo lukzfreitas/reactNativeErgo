@@ -6,18 +6,18 @@ const App = createAppContainer(
   createStackNavigator({
     Login: {
       screen: Login,
-      navigationOptions: () => ({        
+      navigationOptions: () => ({
         header: null, // not showing header on component        
-      })      
+      })
     },
     Register: {
-      screen: Register,  
+      screen: Register,
       navigationOptions: () => ({
-        title: 'Registro Empresa',        
+        title: 'Registro Empresa',
         headerLeft: null,
         headerTitleStyle: {
           fontWeight: 'bold',
-          alignSelf: 'center' ,
+          alignSelf: 'center',
           textAlign: 'center',
         },
         headerTintColor: '#008030'

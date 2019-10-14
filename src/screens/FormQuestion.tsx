@@ -1,7 +1,9 @@
 import React, { Component } from 'react';
 import { SafeAreaView, Text, FlatList, DeviceEventEmitter, TouchableOpacity, StyleSheet, View, Alert } from 'react-native';
 import { NavigationScreenProp, NavigationState, NavigationParams } from 'react-navigation';
+import { HeaderBackButton } from 'react-navigation-stack'
 import { Question } from '../components';
+
 
 interface Props {
     navigation: NavigationScreenProp<NavigationState, NavigationParams>;
@@ -26,46 +28,54 @@ export class FormQuestion extends Component<Props, State> {
             count: 0,
             eventEmitter: null
         };
-    }
+    }   
 
     componentDidMount() {
         let questionsId = questions.map((question: any) => {
             return question.id;
         })
         this.setState({ eventEmitter: DeviceEventEmitter.addListener('eventKey', this.questionSelected), questionsId: questionsId });
+    }    
+
+    componentWillUnmount() {        
+        this.state.eventEmitter.remove();
     }
 
-    componentWillUnmount() {
-        // console.log(this.state.questionsIdSelected.length);
-        // if (this.state.questionsIdSelected.length == 0) {
-            
-        // } else {
-        //     Alert.alert(
-        //         'Atenção',
-        //         'As questões respondidas não serão salvas ao sair, você realmente deseja sair?',
-        //         [
-        //             { text: 'Sair', onPress: () => this.state.eventEmitter.remove() },
-        //             { text: 'Cancelar', onPress: () => console.log('cancelado') }
-        //         ]
-        //     );
-        // }
-        this.state.eventEmitter.remove();
+
+    public static navigationOptions = ({navigation}) => {
+        return {            
+            headerLeft: (
+                <HeaderBackButton onPress={() => console.log('teste')}/> 
+              ),
+        }
+    }
+
+    warning = () => {
+        if (this.state.questionsIdSelected.length == 0) {
+            this.props.navigation.goBack();
+        } else {
+            Alert.alert(
+                'Atenção',
+                'As questões respondidas não serão salvas ao sair, você realmente deseja sair?',
+                [
+                    { text: 'Sair', onPress: () => this.state.eventEmitter.remove() },
+                    { text: 'Cancelar', onPress: () => console.log('cancelado') }
+                ]
+            );
+        }
     }
 
     questionSelected = (question: any) => {
         if (this.state.questionsIdSelected.indexOf(question.id) > -1) return;
         this.state.questionsIdSelected.push(question.id);
-        console.log(this.state.questionsIdSelected);
     }
 
     saveQuestions = () => {
         let questionsNotSelected = this.state.questionsId.filter((i) => {
             return this.state.questionsIdSelected.indexOf(i) < 0;
         }).map((i) => {
-            return "Questões: " + i;
+            return "Questão " + i;
         });
-
-        console.log(questionsNotSelected);
 
         Alert.alert(
             'Questões abaixo não foram respondidas',
