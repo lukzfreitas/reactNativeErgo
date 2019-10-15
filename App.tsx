@@ -1,5 +1,7 @@
+import React from 'react'
 import { createAppContainer } from 'react-navigation'
-import { createStackNavigator } from 'react-navigation-stack'
+import { createStackNavigator, HeaderBackButton } from 'react-navigation-stack'
+import { Alert } from 'react-native'
 import { Login, Register, FormQuestion } from './src/screens'
 
 const App = createAppContainer(

@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { SafeAreaView, Text, FlatList, DeviceEventEmitter, TouchableOpacity, StyleSheet, View, Alert } from 'react-native';
+import { BackHandler, SafeAreaView, Text, FlatList, DeviceEventEmitter, TouchableOpacity, StyleSheet, View, Alert } from 'react-native';
 import { NavigationScreenProp, NavigationState, NavigationParams } from 'react-navigation';
 import { HeaderBackButton } from 'react-navigation-stack'
 import { Question } from '../components';
@@ -14,6 +14,7 @@ interface State {
     questionsIdSelected: number[];
     count: number;
     eventEmitter: any;
+    backHandle: any;
 }
 
 const questions: any[] = require('../assets/questions.json').data;
@@ -26,42 +27,50 @@ export class FormQuestion extends Component<Props, State> {
             questionsId: [],
             questionsIdSelected: [],
             count: 0,
-            eventEmitter: null
+            eventEmitter: null,
+            backHandle: null
         };
-    }   
+    }
 
     componentDidMount() {
         let questionsId = questions.map((question: any) => {
             return question.id;
         })
-        this.setState({ eventEmitter: DeviceEventEmitter.addListener('eventKey', this.questionSelected), questionsId: questionsId });
-    }    
+        this.setState({
+            eventEmitter: DeviceEventEmitter.addListener('eventKey', this.questionSelected), questionsId: questionsId,
+            backHandle: BackHandler.addEventListener('hardwareBackPress', () => {
+                if (this.state.questionsIdSelected.length > 0) {
+                    Alert.alert(
+                        'As questões respondidas não serão salvas',
+                        'Você deseja realmente sair?',
+                        [
+                            { text: 'Sair', onPress: () => this.props.navigation.goBack() },
+                            { text: 'Cancelar', onPress: () => console.log('sair') }
+                        ]
+                    );
+                    return true;
+                }
+            })
+        });
+    }
 
-    componentWillUnmount() {        
+    componentWillUnmount() {
         this.state.eventEmitter.remove();
+        this.state.backHandle.remove();
     }
 
-
-    public static navigationOptions = ({navigation}) => {
-        return {            
-            headerLeft: (
-                <HeaderBackButton onPress={() => console.log('teste')}/> 
-              ),
-        }
-    }
-
-    warning = () => {
-        if (this.state.questionsIdSelected.length == 0) {
-            this.props.navigation.goBack();
-        } else {
-            Alert.alert(
-                'Atenção',
-                'As questões respondidas não serão salvas ao sair, você realmente deseja sair?',
-                [
-                    { text: 'Sair', onPress: () => this.state.eventEmitter.remove() },
-                    { text: 'Cancelar', onPress: () => console.log('cancelado') }
-                ]
-            );
+    public static navigationOptions = ({ navigation }) => {
+        return {
+            headerLeft: <HeaderBackButton onPress={() => {
+                Alert.alert(
+                    'As questões respondidas não serão salvas',
+                    'Você deseja realmente sair?',
+                    [
+                        { text: 'Sair', onPress: () => navigation.goBack() },
+                        { text: 'Cancelar', onPress: () => console.log('sair') }
+                    ]
+                );
+            }} />
         }
     }
 
@@ -82,7 +91,6 @@ export class FormQuestion extends Component<Props, State> {
             questionsNotSelected.slice(0, 10).join("\n")
         )
     }
-
 
     render() {
         return (
