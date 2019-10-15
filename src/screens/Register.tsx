@@ -30,7 +30,7 @@ export class Register extends Component<Props, State> {
             const dim = Dimensions.get('screen');
             return dim.height >= dim.width;
         };
-        this.state = {
+        this.state = {            
             cnpj: '',
             invalidCnpj: false,
             razaoSocial: '',
@@ -66,8 +66,10 @@ export class Register extends Component<Props, State> {
             this.setState({ invalidSetor: true })
         }
         if (!invalid) {
-            this.props.navigation.navigate('FormQuestion')
+            this.props.navigation.navigate('FormQuestion')            
+            return false;
         }
+        return true;
     }
 
     openDatePicker = () => {

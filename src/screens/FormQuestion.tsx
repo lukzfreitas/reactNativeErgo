@@ -14,7 +14,7 @@ interface State {
     questionsIdSelected: number[];
     count: number;
     eventEmitter: any;
-    backHandle: any;
+    backHandler: any;
 }
 
 const questions: any[] = require('../assets/questions.json').data;
@@ -28,7 +28,7 @@ export class FormQuestion extends Component<Props, State> {
             questionsIdSelected: [],
             count: 0,
             eventEmitter: null,
-            backHandle: null
+            backHandler: null
         };
     }
 
@@ -38,7 +38,7 @@ export class FormQuestion extends Component<Props, State> {
         })
         this.setState({
             eventEmitter: DeviceEventEmitter.addListener('eventKey', this.questionSelected), questionsId: questionsId,
-            backHandle: BackHandler.addEventListener('hardwareBackPress', () => {
+            backHandler: BackHandler.addEventListener('hardwareBackPress', () => {
                 if (this.state.questionsIdSelected.length > 0) {
                     Alert.alert(
                         'As questões respondidas não serão salvas',
@@ -56,7 +56,7 @@ export class FormQuestion extends Component<Props, State> {
 
     componentWillUnmount() {
         this.state.eventEmitter.remove();
-        this.state.backHandle.remove();
+        this.state.backHandler.remove();
     }
 
     public static navigationOptions = ({ navigation }) => {
