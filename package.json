@@ -32,6 +32,7 @@
     "react-navigation": "^4.0.10",
     "react-navigation-drawer": "^2.2.2",
     "react-navigation-stack": "^1.9.3",
+    "realm": "^3.2.0",
     "typescript": "^3.6.3"
   },
   "devDependencies": {

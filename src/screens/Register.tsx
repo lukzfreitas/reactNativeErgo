@@ -5,7 +5,8 @@ import { NavigationScreenProp, NavigationState, NavigationParams } from 'react-n
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { If } from '../commons';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { faCalendarAlt } from '@fortawesome/free-regular-svg-icons'
+import { faCalendarAlt } from '@fortawesome/free-regular-svg-icons';
+import { Realm } from 'realm';
 
 interface Props {
     navigation: NavigationScreenProp<NavigationState, NavigationParams>;
