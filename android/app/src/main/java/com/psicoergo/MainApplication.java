@@ -21,15 +21,11 @@ public class MainApplication extends Application implements ReactApplication {
 
         @Override
         protected List<ReactPackage> getPackages() {
-          //@SuppressWarnings("UnnecessaryLocalVariable") // comentary
-          //List<ReactPackage> packages = new PackageList(this).getPackages(); //comentary
+          @SuppressWarnings("UnnecessaryLocalVariable")
+          List<ReactPackage> packages = new PackageList(this).getPackages();
           // Packages that cannot be autolinked yet can be added manually here, for example:
           // packages.add(new MyReactNativePackage());
-          //return packages; // comentary
-          return Arrays.<ReactPackage>asList(
-              new MainReactPackage(),
-              new RealmReactPackage() // add this line
-          ); 
+          return packages;          
         }
 
         @Override

@@ -6,20 +6,20 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import { If } from '../commons';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faCalendarAlt } from '@fortawesome/free-regular-svg-icons';
-import { Realm } from 'realm';
+import { RealmService } from '../services'
 
 interface Props {
     navigation: NavigationScreenProp<NavigationState, NavigationParams>;
 }
 
 interface State {
-    cnpj: string;
+    empresa: any;
     invalidCnpj: boolean;
-    razaoSocial: string;
     invalidRazaoSocial: boolean;
     setor: string;
     invalidSetor: boolean;
     dateQuestion: any;
+    empresaExist: boolean;
     portrait: boolean;
 }
 
@@ -31,46 +31,21 @@ export class Register extends Component<Props, State> {
             const dim = Dimensions.get('screen');
             return dim.height >= dim.width;
         };
-        this.state = {            
-            cnpj: '',
+        this.state = {
+            empresa: { cnpj: '', razaoSocial: '' },
             invalidCnpj: false,
-            razaoSocial: '',
             invalidRazaoSocial: false,
             setor: '',
+            empresaExist: false,
             invalidSetor: false,
             dateQuestion: { date: new Date(), mode: 'date', show: false },
             portrait: isPortrait()
         };
-
-        // Event Listener for orientation changes
         Dimensions.addEventListener('change', () => {
             this.setState({
                 portrait: isPortrait()
             });
         });
-    }
-
-
-
-    validForm = () => {
-        let invalid: boolean = false;
-        if (this.state.cnpj === '') {
-            invalid = true;
-            this.setState({ invalidCnpj: true })
-        }
-        if (this.state.razaoSocial === '') {
-            invalid = true;
-            this.setState({ invalidRazaoSocial: true })
-        }
-        if (this.state.setor === '') {
-            invalid = true;
-            this.setState({ invalidSetor: true })
-        }
-        if (!invalid) {
-            this.props.navigation.navigate('FormQuestion')            
-            return false;
-        }
-        return true;
     }
 
     openDatePicker = () => {
@@ -102,27 +77,86 @@ export class Register extends Component<Props, State> {
         })
     }
 
+    isValidForm = () => {
+        let invalid: boolean = false;
+        if (this.state.empresa.cnpj === '') {
+            invalid = true;
+            this.setState({ invalidCnpj: true })
+        }
+        if (this.state.empresa.razaoSocial === '') {
+            invalid = true;
+            this.setState({ invalidRazaoSocial: true })
+        }
+        if (this.state.setor === '') {
+            invalid = true;
+            this.setState({ invalidSetor: true })
+        }
+        if (!invalid) {
+            this.props.navigation.navigate('FormQuestion')
+            return true;
+        }
+    }
+
+    saveEmpresa = async () => {
+        if (this.isValidForm()) {
+            const data = {
+                cnpj: this.state.empresa.cnpj,
+                nome: this.state.empresa.razaoSocial,
+                setor: this.state.setor
+            };
+            const realm = await RealmService.getRealm();
+            if (!this.state.empresaExist) {
+                realm.write(() => {
+                    console.log('create');
+                    let empresa: any = realm.create('EmpresaSchema', data);
+                    empresa.setores.push(data.setor);
+                });
+            } else {
+                realm.write(() => {
+                    console.log('edit');
+                    let empresa: any = realm.create('EmpresaSchema', data, true);
+                    empresa.setores.push(data.setor);
+                })
+            }
+        }
+    }
+
+    findEmpresa = async () => {
+        async function loadEmpresas(cnpj: string) {
+            const realm = await RealmService.getRealm();
+            return realm.objects('EmpresaSchema').filtered("cnpj = " + `'${cnpj}'`);
+        }
+        let foundEmpresa: any = await loadEmpresas(this.state.empresa.cnpj); // refatorar        
+        if (foundEmpresa.length > 0) {
+            console.log('foud Empresa', foundEmpresa);
+            this.setState(state => { return { ...state, empresa: { ...state.empresa, cnpj: foundEmpresa[0].cnpj, razaoSocial: foundEmpresa[0].nome }, empresaExist: true } });            
+        } else {
+            this.setState(state => { return { ...state, empresa: { ...state.empresa, razaoSocial: '' }, empresaExist: false } });
+        }
+    }
+
     render() {
-        const { cnpj, invalidCnpj, razaoSocial, invalidRazaoSocial, setor, invalidSetor, dateQuestion, portrait } = this.state;
+        const { empresa, invalidCnpj, invalidRazaoSocial, setor, invalidSetor, dateQuestion, portrait } = this.state;
         return (
             <ScrollView style={style.screen}>
                 <TextInputMask
                     type={'cnpj'}
                     style={portrait ? style.textInput : style.textInputLandscape}
-                    value={cnpj}
+                    value={empresa.cnpj}
                     underlineColorAndroid={invalidCnpj ? 'red' : '#008030'}
                     placeholder={invalidCnpj ? 'CNPJ não informado' : 'Informe o CNPJ'}
                     placeholderTextColor={invalidCnpj ? 'red' : '#008030'}
-                    onChangeText={text => this.setState({ cnpj: text })}
+                    onChangeText={text => this.setState(state => { return { ...state, empresa: { ...state.empresa, cnpj: text } } })}
                     onChange={() => this.setState({ invalidCnpj: false })}
+                    onBlur={() => this.findEmpresa()} // Verify
                 />
                 <TextInput
                     style={portrait ? style.textInput : style.textInputLandscape}
-                    value={razaoSocial}
+                    value={empresa.razaoSocial}
                     underlineColorAndroid={invalidRazaoSocial ? 'red' : '#008030'}
                     placeholder={invalidRazaoSocial ? 'Razão social não informada' : 'Informe a razão social'}
                     placeholderTextColor={invalidRazaoSocial ? 'red' : '#008030'}
-                    onChangeText={text => this.setState({ razaoSocial: text })}
+                    onChangeText={text => this.setState(state => { return { ...state, empresa: { ...state.empresa, razaoSocial: text } } })}
                     onChange={() => this.setState({ invalidRazaoSocial: false })}
                 />
                 <TextInput
@@ -158,7 +192,7 @@ export class Register extends Component<Props, State> {
                         locale="pt-BR"
                         onChange={(value) => this.setDate(value)} />
                 </If>
-                <TouchableOpacity style={style.button} onPress={() => this.validForm()}>
+                <TouchableOpacity style={style.button} onPress={() => this.saveEmpresa()}>
                     <Text style={style.textButton}>Cadastrar</Text>
                 </TouchableOpacity>
             </ScrollView>
