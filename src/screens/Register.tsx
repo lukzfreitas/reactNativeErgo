@@ -49,15 +49,7 @@ export class Register extends Component<Props, State> {
     }
 
     openDatePicker = () => {
-        this.setState(state => {
-            return {
-                ...state,
-                dateQuestion: {
-                    ...state.dateQuestion,
-                    show: true,
-                }
-            }
-        })
+        this.setState(state => { return { ...state, dateQuestion: { ...state.dateQuestion, show: true, } } })
     }
 
     setDate = (value: any) => {
@@ -65,59 +57,47 @@ export class Register extends Component<Props, State> {
         if (value.type !== "dismissed") {
             date = new Date(value.nativeEvent.timestamp);
         }
-        this.setState(state => {
-            return {
-                ...state,
-                dateQuestion: {
-                    ...state.dateQuestion,
-                    date: date,
-                    show: false
-                }
-            }
-        })
+        this.setState(state => { return { ...state, dateQuestion: { ...state.dateQuestion, date: date, show: false } } });
     }
 
     isValidForm = () => {
-        let invalid: boolean = false;
+        let invalid: boolean = true;
         if (this.state.empresa.cnpj === '') {
-            invalid = true;
+            invalid = !invalid;
             this.setState({ invalidCnpj: true })
         }
         if (this.state.empresa.razaoSocial === '') {
-            invalid = true;
+            invalid = !invalid;
             this.setState({ invalidRazaoSocial: true })
         }
         if (this.state.setor === '') {
-            invalid = true;
+            invalid = !invalid;
             this.setState({ invalidSetor: true })
         }
-        if (!invalid) {
+        return invalid;
+    }
+
+    save = async () => {
+        if (this.isValidForm()) {
+            const empresaSchema = { cnpj: this.state.empresa.cnpj, nome: this.state.empresa.razaoSocial, setor: this.state.setor };
+            await this.saveEmpresa(empresaSchema);
+            this.setState(state => { return { ...state, empresa: { ...state.empresa, razaoSocial: '', cnpj: '' }, setor: '', empresaExist: false } });
             this.props.navigation.navigate('FormQuestion')
-            return true;
         }
     }
 
-    saveEmpresa = async () => {
-        if (this.isValidForm()) {
-            const data = {
-                cnpj: this.state.empresa.cnpj,
-                nome: this.state.empresa.razaoSocial,
-                setor: this.state.setor
-            };
-            const realm = await RealmService.getRealm();
-            if (!this.state.empresaExist) {
-                realm.write(() => {
-                    console.log('create');
-                    let empresa: any = realm.create('EmpresaSchema', data);
-                    empresa.setores.push(data.setor);
-                });
-            } else {
-                realm.write(() => {
-                    console.log('edit');
-                    let empresa: any = realm.create('EmpresaSchema', data, true);
-                    empresa.setores.push(data.setor);
-                })
-            }
+    saveEmpresa = async (empresaSchema: any) => {
+        const realm = await RealmService.getRealm();
+        if (!this.state.empresaExist) {
+            realm.write(() => {
+                let empresa: any = realm.create('EmpresaSchema', empresaSchema);
+                empresa.setores.push(empresaSchema.setor);
+            });
+        } else {
+            realm.write(() => {
+                let empresa: any = realm.create('EmpresaSchema', empresaSchema, true);
+                empresa.setores.push(empresaSchema.setor);
+            })
         }
     }
 
@@ -126,10 +106,9 @@ export class Register extends Component<Props, State> {
             const realm = await RealmService.getRealm();
             return realm.objects('EmpresaSchema').filtered("cnpj = " + `'${cnpj}'`);
         }
-        let foundEmpresa: any = await loadEmpresas(this.state.empresa.cnpj); // refatorar        
+        let foundEmpresa: any = await loadEmpresas(this.state.empresa.cnpj);
         if (foundEmpresa.length > 0) {
-            console.log('foud Empresa', foundEmpresa);
-            this.setState(state => { return { ...state, empresa: { ...state.empresa, cnpj: foundEmpresa[0].cnpj, razaoSocial: foundEmpresa[0].nome }, empresaExist: true } });            
+            this.setState(state => { return { ...state, empresa: { ...state.empresa, cnpj: foundEmpresa[0].cnpj, razaoSocial: foundEmpresa[0].nome }, empresaExist: true } });
         } else {
             this.setState(state => { return { ...state, empresa: { ...state.empresa, razaoSocial: '' }, empresaExist: false } });
         }
@@ -192,7 +171,7 @@ export class Register extends Component<Props, State> {
                         locale="pt-BR"
                         onChange={(value) => this.setDate(value)} />
                 </If>
-                <TouchableOpacity style={style.button} onPress={() => this.saveEmpresa()}>
+                <TouchableOpacity style={style.button} onPress={() => this.save()}>
                     <Text style={style.textButton}>Cadastrar</Text>
                 </TouchableOpacity>
             </ScrollView>
