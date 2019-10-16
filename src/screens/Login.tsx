@@ -32,7 +32,6 @@ export class Login extends Component<Props, State> {
     }
 
     render() {
-
         return (
             <View style={style.screen}>
                 <Image style={style.logo} source={require('../assets/logo_sem_fundo.png')} />

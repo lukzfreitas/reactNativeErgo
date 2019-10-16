@@ -80,9 +80,9 @@ export class Register extends Component<Props, State> {
     save = async () => {
         if (this.isValidForm()) {
             const empresaSchema = { cnpj: this.state.empresa.cnpj, nome: this.state.empresa.razaoSocial, setor: this.state.setor };
-            await this.saveEmpresa(empresaSchema);
+            await this.saveEmpresa(empresaSchema);            
+            this.props.navigation.navigate('FormQuestion', {empresa: this.state.empresa, setor: this.state.setor, mes: this.state.dateQuestion});
             this.setState(state => { return { ...state, empresa: { ...state.empresa, razaoSocial: '', cnpj: '' }, setor: '', empresaExist: false } });
-            this.props.navigation.navigate('FormQuestion')
         }
     }
 
@@ -127,7 +127,7 @@ export class Register extends Component<Props, State> {
                     placeholderTextColor={invalidCnpj ? 'red' : '#008030'}
                     onChangeText={text => this.setState(state => { return { ...state, empresa: { ...state.empresa, cnpj: text } } })}
                     onChange={() => this.setState({ invalidCnpj: false })}
-                    onBlur={() => this.findEmpresa()} // Verify
+                    onBlur={() => this.findEmpresa()}
                 />
                 <TextInput
                     style={portrait ? style.textInput : style.textInputLandscape}

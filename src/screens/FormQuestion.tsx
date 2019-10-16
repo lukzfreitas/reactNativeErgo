@@ -3,6 +3,7 @@ import { BackHandler, SafeAreaView, Text, FlatList, DeviceEventEmitter, Touchabl
 import { NavigationScreenProp, NavigationState, NavigationParams } from 'react-navigation';
 import { HeaderBackButton } from 'react-navigation-stack'
 import { Question } from '../components';
+import { RealmService } from '../services';
 
 
 interface Props {
@@ -10,6 +11,11 @@ interface Props {
 }
 
 interface State {
+    id: number;
+    empresa: any;
+    setor: string;
+    mes: string;
+    questions: any[];
     questionsId: number[];
     questionsIdSelected: number[];
     count: number;
@@ -17,13 +23,18 @@ interface State {
     backHandler: any;
 }
 
-const questions: any[] = require('../assets/questions.json').data;
+// const questions: any[] = require('../assets/questions.json').data;
 
 export class FormQuestion extends Component<Props, State> {
 
     constructor(props: Props) {
         super(props);
         this.state = {
+            id: 0,
+            empresa: props.navigation.getParam('empresa'),
+            setor: props.navigation.getParam('setor'),
+            mes: props.navigation.getParam('mes'),
+            questions: require('../assets/questions.json').data,
             questionsId: [],
             questionsIdSelected: [],
             count: 0,
@@ -33,7 +44,7 @@ export class FormQuestion extends Component<Props, State> {
     }
 
     componentDidMount() {
-        let questionsId = questions.map((question: any) => {
+        let questionsId = this.state.questions.map((question: any) => {
             return question.id;
         })
         this.setState({
@@ -77,29 +88,58 @@ export class FormQuestion extends Component<Props, State> {
     questionSelected = (question: any) => {
         if (this.state.questionsIdSelected.indexOf(question.id) > -1) return;
         this.state.questionsIdSelected.push(question.id);
+        // this.state.questions.push(question);
     }
 
-    saveQuestions = () => {
+    saveQuestions = async () => {
         let questionsNotSelected = this.state.questionsId.filter((i) => {
             return this.state.questionsIdSelected.indexOf(i) < 0;
         }).map((i) => {
             return "Questão " + i;
         });
 
-        Alert.alert(
-            'Questões abaixo não foram respondidas',
-            questionsNotSelected.slice(0, 10).join("\n")
-        )
+        if (questionsNotSelected.length > 0) {
+            Alert.alert(
+                'Questões abaixo não foram respondidas',
+                questionsNotSelected.slice(0, 10).join("\n")
+            )
+        } else {
+            console.log('questions ', this.state.questions);
+            // let questionsSchema = this.state.questions.reduce((object: any, question: any) => {
+            //     object['q' + question.id] = '' + question.option
+            //     return object;
+            // });            
+            // questionsSchema.cnpj = this.state.empresa.cnpj;
+            // questionsSchema.setor = this.state.setor;
+            // questionsSchema.mes = this.state.mes;
+            // const realm = await RealmService.getRealm();
+            // realm.write(() => {                
+            //     console.log('questions schema', questionsSchema);
+            //     realm.create('QuestionarioSchema', questionsSchema);                
+            // });
+            // let question = realm.objects('QuestionarioSchema').filtered("cnpj = " + `'${this.state.empresa.cnpj}'`);
+            // console.log(question);
+        }
     }
 
     render() {
+        const { empresa, setor, questions } = this.state;
         return (
             <View style={style.screen}>
+                <Text style={style.titleRazaoSocial}>
+                    {empresa.razaoSocial}
+                </Text>
+                <Text style={style.titleCnpj}>
+                    {empresa.cnpj}
+                </Text>
+                <Text style={style.titleSetor}>
+                    {setor}
+                </Text>
                 <View style={style.contentList}>
                     <SafeAreaView>
                         <FlatList
                             data={questions}
-                            keyExtractor={(question: any) => question.description}
+                            keyExtractor={(question: any) => question.id}
                             renderItem={({ item, index, separators }) => (
                                 <Question item={item} />
                             )}
@@ -120,6 +160,21 @@ const style = StyleSheet.create({
     screen: {
         flex: 10,
         flexDirection: 'column'
+    },
+    titleRazaoSocial: {
+        alignSelf: 'center',
+        fontSize: 20,
+        fontWeight: 'bold'
+    },
+    titleCnpj: {
+        alignSelf: 'center',
+        fontSize: 15,
+        fontWeight: 'bold'
+    },
+    titleSetor: {
+        alignSelf: 'center',
+        fontSize: 10,
+        fontWeight: 'bold'
     },
     contentList: {
         flex: 9
