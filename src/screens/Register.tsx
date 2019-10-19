@@ -188,13 +188,13 @@ const style = StyleSheet.create({
     textInput: {
         flex: 1,
         alignSelf: 'center',
-        width: 320,
-        marginVertical: 10
+        width: 600,
+        marginVertical: 30,        
     },
     textInputLandscape: {
         flex: 1,
         alignSelf: 'center',
-        width: 500,
+        width: 800,
         marginVertical: 10
     },
     calendar: {

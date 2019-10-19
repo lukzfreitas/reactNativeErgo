@@ -1,9 +1,20 @@
 import React, { Component } from 'react';
-import { BackHandler, SafeAreaView, Text, FlatList, DeviceEventEmitter, TouchableOpacity, StyleSheet, View, Alert } from 'react-native';
 import { NavigationScreenProp, NavigationState, NavigationParams } from 'react-navigation';
 import { HeaderBackButton } from 'react-navigation-stack'
 import { Question } from '../components';
 import { RealmService } from '../services';
+import {
+    BackHandler,
+    SafeAreaView,
+    Text,
+    FlatList,
+    DeviceEventEmitter,
+    TouchableOpacity,
+    StyleSheet,
+    View,
+    Alert,
+    ToastAndroid
+} from 'react-native';
 
 
 interface Props {
@@ -11,40 +22,37 @@ interface Props {
 }
 
 interface State {
-    id: number;
     empresa: any;
     setor: string;
     mes: string;
     questions: any[];
     questionsId: number[];
     questionsIdSelected: number[];
-    count: number;
     eventEmitter: any;
     backHandler: any;
 }
 
-// const questions: any[] = require('../assets/questions.json').data;
+var questions: any[] = require('../assets/questions.json').data;
 
 export class FormQuestion extends Component<Props, State> {
 
     constructor(props: Props) {
         super(props);
+        const dateQuestion: Date = props.navigation.getParam('mes').date;
         this.state = {
-            id: 0,
             empresa: props.navigation.getParam('empresa'),
             setor: props.navigation.getParam('setor'),
-            mes: props.navigation.getParam('mes'),
-            questions: require('../assets/questions.json').data,
+            mes: dateQuestion.getMonth() + 1 + '/' + dateQuestion.getFullYear(),
+            questions: [],
             questionsId: [],
             questionsIdSelected: [],
-            count: 0,
             eventEmitter: null,
             backHandler: null
         };
     }
 
     componentDidMount() {
-        let questionsId = this.state.questions.map((question: any) => {
+        let questionsId = questions.map((question: any) => {
             return question.id;
         })
         this.setState({
@@ -77,53 +85,76 @@ export class FormQuestion extends Component<Props, State> {
                     'As questões respondidas não serão salvas',
                     'Você deseja realmente sair?',
                     [
-                        { text: 'Sair', onPress: () => navigation.goBack() },
-                        { text: 'Cancelar', onPress: () => console.log('sair') }
+                        { text: 'Cancelar', onPress: () => console.log('sair') },
+                        { text: 'Sair', onPress: () => navigation.goBack() }
                     ]
                 );
             }} />
         }
     }
 
-    questionSelected = (question: any) => {
-        if (this.state.questionsIdSelected.indexOf(question.id) > -1) return;
+    private questionSelected = (question: any) => {
+        let index = this.state.questionsIdSelected.indexOf(question.id);
+        if (index > -1) {
+            this.state.questions.splice(index, 1);
+            this.state.questionsIdSelected.splice(index, 1);
+        };
         this.state.questionsIdSelected.push(question.id);
-        // this.state.questions.push(question);
+        this.state.questions.push(question);
     }
 
-    saveQuestions = async () => {
+    private saveQuestions = async () => {
+        let questionsSchema = this.state.questions.reduce((object: any, question: any) => {
+            object['q' + question.id] = question.option
+            return object;
+        }, {});
+
+        questionsSchema.cnpj = this.state.empresa.cnpj;
+        questionsSchema.setor = this.state.setor;
+        questionsSchema.mes = this.state.mes;
+        const realm = await RealmService.getRealm();
+        realm.write(() => {
+            realm.create('QuestionarioSchema', questionsSchema);
+        });
+        let questions = realm.objects('QuestionarioSchema').filtered("cnpj = " + `'${this.state.empresa.cnpj}'`);
+        console.log(questions)
+    }
+
+    submit = () => {
         let questionsNotSelected = this.state.questionsId.filter((i) => {
             return this.state.questionsIdSelected.indexOf(i) < 0;
         }).map((i) => {
             return "Questão " + i;
         });
-
         if (questionsNotSelected.length > 0) {
             Alert.alert(
-                'Questões abaixo não foram respondidas',
+                'As questões abaixo não foram preenchidas',
                 questionsNotSelected.slice(0, 10).join("\n")
             )
         } else {
-            console.log('questions ', this.state.questions);
-            // let questionsSchema = this.state.questions.reduce((object: any, question: any) => {
-            //     object['q' + question.id] = '' + question.option
-            //     return object;
-            // });            
-            // questionsSchema.cnpj = this.state.empresa.cnpj;
-            // questionsSchema.setor = this.state.setor;
-            // questionsSchema.mes = this.state.mes;
-            // const realm = await RealmService.getRealm();
-            // realm.write(() => {                
-            //     console.log('questions schema', questionsSchema);
-            //     realm.create('QuestionarioSchema', questionsSchema);                
-            // });
-            // let question = realm.objects('QuestionarioSchema').filtered("cnpj = " + `'${this.state.empresa.cnpj}'`);
-            // console.log(question);
+            Alert.alert(
+                'Salvar Questionário',
+                'Salvar e ir para próximo questionário?',
+                [
+                    { text: 'Não', onPress: () => console.log('cancelado') },
+                    {
+                        text: 'Sim', onPress: async () => {
+                            await this.saveQuestions();
+                            ToastAndroid.showWithGravity(
+                                'Questionário Salvo com sucesso',
+                                ToastAndroid.LONG,
+                                ToastAndroid.TOP
+                            )
+                            this.render();
+                        }
+                    }
+                ]
+            )
         }
     }
 
     render() {
-        const { empresa, setor, questions } = this.state;
+        const { empresa, setor } = this.state;
         return (
             <View style={style.screen}>
                 <Text style={style.titleRazaoSocial}>
@@ -147,7 +178,7 @@ export class FormQuestion extends Component<Props, State> {
                     </SafeAreaView>
                 </View>
                 <View style={style.footer}>
-                    <TouchableOpacity style={style.button} onPress={this.saveQuestions} >
+                    <TouchableOpacity style={style.button} onPress={this.submit} >
                         <Text style={style.textButton}>Salvar Questionário</Text>
                     </TouchableOpacity>
                 </View>

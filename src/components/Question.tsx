@@ -56,10 +56,8 @@ export class Question extends Component<Props, State> {
     changeSlider(option: number) {        
         this.changeQuestion(option).then(() => {            
             DeviceEventEmitter.emit('eventKey', this.state.item);
-        })
-        
+        })        
     }
-
 
     render() {        
         const { item, sliderColor } = this.state;
@@ -75,9 +73,9 @@ export class Question extends Component<Props, State> {
                             color='red'
                             onPress={() => this.changeSlider(1)}
                         />
-                        <If condition={!this.isPortrait()}>
+                        {/* <If condition={!this.isPortrait()}> */}
                             <Text style={style.textSmile}>Discordo{"\n"}Totalmente</Text>
-                        </If>
+                        {/* </If> */}
                     </View>
 
                     <View style={this.isPortrait() ? style.smilePortrait : style.smileLandscape}>
@@ -88,9 +86,9 @@ export class Question extends Component<Props, State> {
                             color='orange'
                             onPress={() => this.changeSlider(2)}
                         />
-                        <If condition={!this.isPortrait()}>
+                        {/* <If condition={!this.isPortrait()}> */}
                             <Text style={style.textSmile}>Discordo{"\n"}Parcialmente</Text>
-                        </If>
+                        {/* </If> */}
                     </View>
 
                     <View style={this.isPortrait() ? style.smilePortrait : style.smileLandscape}>
@@ -101,9 +99,9 @@ export class Question extends Component<Props, State> {
                             color='yellow'
                             onPress={() => this.changeSlider(3)}
                         />
-                        <If condition={!this.isPortrait()}>
-                            <Text style={style.textSmile}>Indiferente</Text>
-                        </If>
+                        {/* <If condition={!this.isPortrait()}> */}
+                            <Text style={style.textSmile}>Indiferente{"\n"}</Text>
+                        {/* </If> */}
                     </View>
 
                     <View style={this.isPortrait() ? style.smilePortrait : style.smileLandscape}>
@@ -114,9 +112,9 @@ export class Question extends Component<Props, State> {
                             color='lightblue'
                             onPress={() => this.changeSlider(4)}
                         />
-                        <If condition={!this.isPortrait()}>
+                        {/* <If condition={!this.isPortrait()}> */}
                             <Text style={style.textSmile}>Condordo{"\n"}Parcialmente</Text>
-                        </If>
+                        {/* </If> */}
                     </View>
 
                     <View style={this.isPortrait() ? style.smilePortrait : style.smileLandscape}>
@@ -127,9 +125,9 @@ export class Question extends Component<Props, State> {
                             color='green'
                             onPress={() => this.changeSlider(5)}
                         />
-                        <If condition={!this.isPortrait()}>
+                        {/* <If condition={!this.isPortrait()}> */}
                             <Text style={style.textSmile}>Condordo{"\n"}Totalmente</Text>
-                        </If>
+                        {/* </If> */}
                     </View>
                 </View>
                 <Slider
@@ -157,21 +155,21 @@ const style = StyleSheet.create({
         alignSelf: 'center'
     },
     smilePortrait: {
-        marginHorizontal: 8,
+        marginHorizontal: 30,
         alignSelf: 'center',
         fontSize: 1
     },
     smileLandscape: {
-        marginHorizontal: 20,
+        marginHorizontal: 50,
         marginVertical: 10,
         alignSelf: 'center'
     },
     sliderPortrait: {
-        marginHorizontal: 20,
+        marginHorizontal: 60,
         marginVertical: 20
     },
     sliderLandscape: {
-        marginHorizontal: 60,
+        marginHorizontal: 140,
         paddingTop: 30
     },
     textSmile: {

@@ -75,16 +75,17 @@ const style = StyleSheet.create({
     },
     logo: {
         alignSelf: 'center',        
-        width: 300,
-        height: 100,
+        width: 600,
+        height: 200,
         resizeMode: 'stretch',
         padding: 10,
         margin: 10        
     },
     input: {
-        width: 300,
+        width: 400,
         padding: 10,
         margin: 10,
+        marginTop: 20,
         textAlignVertical: 'center'
     },
     button: {
