@@ -1,35 +1,40 @@
-import React, { Component } from 'react';
+import React, { Component, PureComponent } from 'react';
 import { StyleSheet, View, Text, Dimensions, DeviceEventEmitter } from 'react-native'
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faAngry, faFrownOpen, faMeh, faSmile, faSmileBeam } from '@fortawesome/free-regular-svg-icons'
 import Slider from '@react-native-community/slider';
 import { If } from '../commons/If';
-
+import {
+    widthPercentageToDP as wp,
+    heightPercentageToDP as hp,
+    listenOrientationChange as loc,
+    removeOrientationListener as rol
+} from 'react-native-responsive-screen';
 
 interface Props {
     item: any;
+    onSelect: any;
 }
 
 interface State {
-    item: any,
+    item: any;
     sliderColor: string,
-    
+    eventEmitter: any
 }
 
-export class Question extends Component<Props, State> {
+export class Question extends PureComponent<Props, State> {
 
     constructor(props: Props) {
         super(props);
-        this.state = { item: this.props.item, sliderColor: 'gray' }        
+        this.state = {  item: props.item, sliderColor: 'gray', eventEmitter: null }
     }
 
-    isPortrait = () => {
-        const dim = Dimensions.get('screen');
-        return dim.height >= dim.width;
-    };        
+    getScreenInfo = () => {
+        const dim = Dimensions.get('window');
+        return dim;
+    }
 
-
-    changeQuestion = async (option: number) => {
+    changeQuestion = (option: number) => {
         switch (option) {
             case 1:
                 this.setState(state => { return { ...state, item: { ...state.item, option: 1, selected: true}, sliderColor: 'red' }});
@@ -38,7 +43,7 @@ export class Question extends Component<Props, State> {
                 this.setState(state => { return { ...state, item: { ...state.item, option: 2, selected: true}, sliderColor: 'orange' }});
                 break;
             case 3:
-                this.setState(state => { return { ...state, item: { ...state.item, option: 3, selected: true}, sliderColor: 'yellow'}});
+                this.setState(state => { return { ...state, item: { ...state.item, option: 3, selected: true}, sliderColor: 'gold'}});
                 break;
             case 4:
                 this.setState(state => { return { ...state, item: { ...state.item, option: 4, selected: true}, sliderColor: 'lightblue'}});
@@ -49,95 +54,89 @@ export class Question extends Component<Props, State> {
             default:
                     this.setState(state => { return { ...state, item: { ...state.item, option: 1, selected: false}, sliderColor: 'gray'}});                
                 break;
-        }
-        return Promise.resolve();
-    }
+        }        
+    }    
 
-    changeSlider(option: number) {        
-        this.changeQuestion(option).then(() => {            
-            DeviceEventEmitter.emit('eventKey', this.state.item);
-        })        
-    }
-
-    render() {        
-        const { item, sliderColor } = this.state;
+    render() {
+        const { onSelect } = this.props;
+        const { sliderColor, item } = this.state;
         return (
             <View>
                 <Text style={style.question} key={item.id}>{item.description}</Text>
                 <View style={style.answers}>
-                    <View style={this.isPortrait() ? style.smilePortrait : style.smileLandscape}>
+                    <View style={this.getScreenInfo().width > 360 ? style.smileLandscape : style.smilePortrait}>
                         <FontAwesomeIcon
-                            style={this.isPortrait() ? style.smilePortrait : style.smileLandscape}
+                            style={this.getScreenInfo().width > 360 ? style.smileLandscape : style.smilePortrait}
                             icon={faAngry}
                             size={40}
                             color='red'
-                            onPress={() => this.changeSlider(1)}
+                            onPress={() => {onSelect(item, 1); this.changeQuestion(1)}}                        
                         />
-                        {/* <If condition={!this.isPortrait()}> */}
+                        <If condition={this.getScreenInfo().width > 360}>
                             <Text style={style.textSmile}>Discordo{"\n"}Totalmente</Text>
-                        {/* </If> */}
+                        </If>
                     </View>
 
-                    <View style={this.isPortrait() ? style.smilePortrait : style.smileLandscape}>
+                    <View style={this.getScreenInfo().width > 360 ? style.smileLandscape : style.smilePortrait}>
                         <FontAwesomeIcon
-                            style={this.isPortrait() ? style.smilePortrait : style.smileLandscape}
+                            style={this.getScreenInfo().width > 360 ? style.smileLandscape : style.smilePortrait}
                             icon={faFrownOpen}
                             size={40}
                             color='orange'
-                            onPress={() => this.changeSlider(2)}
+                            onPress={() => {onSelect(item, 2); this.changeQuestion(2)}}                        
                         />
-                        {/* <If condition={!this.isPortrait()}> */}
+                        <If condition={this.getScreenInfo().width > 360}>
                             <Text style={style.textSmile}>Discordo{"\n"}Parcialmente</Text>
-                        {/* </If> */}
+                        </If>
                     </View>
 
-                    <View style={this.isPortrait() ? style.smilePortrait : style.smileLandscape}>
+                    <View style={this.getScreenInfo().width > 360 ? style.smileLandscape : style.smilePortrait}>
                         <FontAwesomeIcon
-                            style={this.isPortrait() ? style.smilePortrait : style.smileLandscape}
+                            style={this.getScreenInfo().width > 360 ? style.smileLandscape : style.smilePortrait}
                             icon={faMeh}
                             size={40}
-                            color='yellow'
-                            onPress={() => this.changeSlider(3)}
+                            color='gold'
+                            onPress={() => {onSelect(item, 3); this.changeQuestion(3)}}                        
                         />
-                        {/* <If condition={!this.isPortrait()}> */}
+                        <If condition={this.getScreenInfo().width > 360}>
                             <Text style={style.textSmile}>Indiferente{"\n"}</Text>
-                        {/* </If> */}
+                        </If>
                     </View>
 
-                    <View style={this.isPortrait() ? style.smilePortrait : style.smileLandscape}>
+                    <View style={this.getScreenInfo().width > 360 ? style.smileLandscape : style.smilePortrait}>
                         <FontAwesomeIcon
-                            style={this.isPortrait() ? style.smilePortrait : style.smileLandscape}
+                            style={this.getScreenInfo().width > 360 ? style.smileLandscape : style.smilePortrait}
                             icon={faSmile}
                             size={40}
                             color='lightblue'
-                            onPress={() => this.changeSlider(4)}
+                            onPress={() => {onSelect(item, 4); this.changeQuestion(4)}}
                         />
-                        {/* <If condition={!this.isPortrait()}> */}
+                        <If condition={this.getScreenInfo().width > 360}>
                             <Text style={style.textSmile}>Condordo{"\n"}Parcialmente</Text>
-                        {/* </If> */}
+                        </If>
                     </View>
 
-                    <View style={this.isPortrait() ? style.smilePortrait : style.smileLandscape}>
+                    <View style={this.getScreenInfo().width > 360 ? style.smileLandscape : style.smilePortrait}>
                         <FontAwesomeIcon
-                            style={this.isPortrait() ? style.smilePortrait : style.smileLandscape}
+                            style={this.getScreenInfo().width > 360 ? style.smileLandscape : style.smilePortrait}
                             icon={faSmileBeam}
                             size={40}
                             color='green'
-                            onPress={() => this.changeSlider(5)}
+                            onPress={() => {onSelect(item, 5); this.changeQuestion(5)}}
                         />
-                        {/* <If condition={!this.isPortrait()}> */}
+                        <If condition={this.getScreenInfo().width > 360}>
                             <Text style={style.textSmile}>Condordo{"\n"}Totalmente</Text>
-                        {/* </If> */}
+                        </If>
                     </View>
                 </View>
                 <Slider
-                    style={this.isPortrait() ? style.sliderPortrait : style.sliderLandscape}
+                    style={this.getScreenInfo().width > 360 ? style.sliderLandscape : style.sliderPortrait}
                     value={item.option}
                     minimumValue={1}
                     maximumValue={5}
                     thumbTintColor={sliderColor}
                     step={1}
-                    onValueChange={(option: number) => this.changeSlider(option)}
+                    onValueChange={() => {onSelect(item, item.option); this.changeQuestion(item.option)}}
                 />
             </View>
         )
@@ -146,7 +145,7 @@ export class Question extends Component<Props, State> {
 
 const style = StyleSheet.create({
     question: {
-        padding: 15,
+        padding: wp('4%'),
         fontSize: 15,
         fontWeight: 'bold',
     },
@@ -155,22 +154,22 @@ const style = StyleSheet.create({
         alignSelf: 'center'
     },
     smilePortrait: {
-        marginHorizontal: 30,
+        marginHorizontal: wp('5%'),
         alignSelf: 'center',
         fontSize: 1
     },
     smileLandscape: {
-        marginHorizontal: 50,
+        marginHorizontal: wp('3.6%'),
         marginVertical: 10,
         alignSelf: 'center'
     },
     sliderPortrait: {
-        marginHorizontal: 60,
-        marginVertical: 20
+        marginHorizontal: wp('6%'),
+        marginVertical: wp('3%')
     },
     sliderLandscape: {
-        marginHorizontal: 140,
-        paddingTop: 30
+        marginHorizontal: wp('10%'),
+        paddingTop: hp('1%')
     },
     textSmile: {
         textAlign: 'center'

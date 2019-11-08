@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { Component, PureComponent } from 'react';
 import { NavigationScreenProp, NavigationState, NavigationParams } from 'react-navigation';
 import { HeaderBackButton } from 'react-navigation-stack'
 import { Question } from '../components';
@@ -7,14 +7,19 @@ import {
     BackHandler,
     SafeAreaView,
     Text,
-    FlatList,
-    DeviceEventEmitter,
+    FlatList,    
     TouchableOpacity,
     StyleSheet,
     View,
     Alert,
     ToastAndroid
 } from 'react-native';
+import {
+    widthPercentageToDP as wp,
+    heightPercentageToDP as hp,
+    listenOrientationChange as loc,
+    removeOrientationListener as rol
+} from 'react-native-responsive-screen';
 
 
 interface Props {
@@ -26,55 +31,52 @@ interface State {
     setor: string;
     mes: string;
     questions: any[];
-    questionsId: number[];
-    questionsIdSelected: number[];
-    eventEmitter: any;
-    backHandler: any;
+    // questionsId: number[];
+    // questionsInit: any[];
+    // questionsIdSelected: number[];    
+    backHandler: any;    
 }
 
-var questions: any[] = require('../assets/questions.json').data;
-
-export class FormQuestion extends Component<Props, State> {
+export class FormQuestion extends PureComponent<Props, State> {
 
     constructor(props: Props) {
         super(props);
-        const dateQuestion: Date = props.navigation.getParam('mes').date;
         this.state = {
             empresa: props.navigation.getParam('empresa'),
             setor: props.navigation.getParam('setor'),
-            mes: dateQuestion.getMonth() + 1 + '/' + dateQuestion.getFullYear(),
-            questions: [],
-            questionsId: [],
-            questionsIdSelected: [],
-            eventEmitter: null,
-            backHandler: null
+            mes: props.navigation.getParam('mes'),
+            // questionsInit: require('../assets/questions.json').data,
+            questions: require('../assets/questions.json').data,
+            // questionsId: [],
+            // questionsIdSelected: [],            
+            backHandler: null,            
         };
+        this.submit = this.submit.bind(this);
     }
 
     componentDidMount() {
-        let questionsId = questions.map((question: any) => {
-            return question.id;
-        })
-        this.setState({
-            eventEmitter: DeviceEventEmitter.addListener('eventKey', this.questionSelected), questionsId: questionsId,
-            backHandler: BackHandler.addEventListener('hardwareBackPress', () => {
-                if (this.state.questionsIdSelected.length > 0) {
-                    Alert.alert(
-                        'As questões respondidas não serão salvas',
-                        'Você deseja realmente sair?',
-                        [
-                            { text: 'Sair', onPress: () => this.props.navigation.goBack() },
-                            { text: 'Cancelar', onPress: () => console.log('sair') }
-                        ]
-                    );
-                    return true;
-                }
-            })
+        // let questionsId = this.state.questionsInit.map((question: any) => {
+        //     return question.id;
+        // })
+        this.setState({            
+            // questionsId: questionsId,
+            // backHandler: BackHandler.addEventListener('hardwareBackPress', () => {
+            //     if (this.state.questionsIdSelected.length > 0) {
+            //         Alert.alert(
+            //             'As questões respondidas não serão salvas',
+            //             'Você deseja realmente sair?',
+            //             [
+            //                 { text: 'Sair', onPress: () => this.props.navigation.goBack() },
+            //                 { text: 'Cancelar', onPress: () => console.log('sair') }
+            //             ]
+            //         );
+            //         return true;
+            //     }
+            // })
         });
     }
 
-    componentWillUnmount() {
-        this.state.eventEmitter.remove();
+    componentWillUnmount() {        
         this.state.backHandler.remove();
     }
 
@@ -91,17 +93,7 @@ export class FormQuestion extends Component<Props, State> {
                 );
             }} />
         }
-    }
-
-    private questionSelected = (question: any) => {
-        let index = this.state.questionsIdSelected.indexOf(question.id);
-        if (index > -1) {
-            this.state.questions.splice(index, 1);
-            this.state.questionsIdSelected.splice(index, 1);
-        };
-        this.state.questionsIdSelected.push(question.id);
-        this.state.questions.push(question);
-    }
+    }    
 
     private saveQuestions = async () => {
         let questionsSchema = this.state.questions.reduce((object: any, question: any) => {
@@ -117,62 +109,76 @@ export class FormQuestion extends Component<Props, State> {
             realm.create('QuestionarioSchema', questionsSchema);
         });
         let questions = realm.objects('QuestionarioSchema').filtered("cnpj = " + `'${this.state.empresa.cnpj}'`);
-        console.log(questions)
     }
 
     submit = () => {
-        let questionsNotSelected = this.state.questionsId.filter((i) => {
-            return this.state.questionsIdSelected.indexOf(i) < 0;
-        }).map((i) => {
-            return "Questão " + i;
-        });
-        if (questionsNotSelected.length > 0) {
-            Alert.alert(
-                'As questões abaixo não foram preenchidas',
-                questionsNotSelected.slice(0, 10).join("\n")
-            )
-        } else {
-            Alert.alert(
-                'Salvar Questionário',
-                'Salvar e ir para próximo questionário?',
-                [
-                    { text: 'Não', onPress: () => console.log('cancelado') },
-                    {
-                        text: 'Sim', onPress: async () => {
-                            await this.saveQuestions();
-                            ToastAndroid.showWithGravity(
-                                'Questionário Salvo com sucesso',
-                                ToastAndroid.LONG,
-                                ToastAndroid.TOP
-                            )
-                            this.render();
-                        }
-                    }
-                ]
-            )
-        }
+        // let questionsNotSelected = this.state.questionsId.filter((i) => {
+        //     return this.state.questionsIdSelected.indexOf(i) < 0;
+        // }).map((i) => {
+        //     return "Questão " + i;
+        // });
+        // if (questionsNotSelected.length > 0) {
+        //     Alert.alert(
+        //         'As questões abaixo não foram preenchidas',
+        //         questionsNotSelected.slice(0, 10).join("\n")
+        //     )
+        // } else {
+        //     Alert.alert(
+        //         'Salvar Questionário',
+        //         'Salvar e ir para próximo questionário?',
+        //         [
+        //             { text: 'Não', onPress: () => console.log('cancelado') },
+        //             {
+        //                 text: 'Sim', onPress: async () => {
+        //                     await this.saveQuestions();
+        //                     ToastAndroid.showWithGravity(
+        //                         'Questionário Salvo com sucesso',
+        //                         ToastAndroid.LONG,
+        //                         ToastAndroid.TOP
+        //                     )
+        //                     this.setState({
+        //                         questionsInit: this.state.questionsInit.map((item) => {
+        //                             return { ...item, option: 0 };
+        //                         })
+        //                     })
+
+        //                 }
+        //             }
+        //         ]
+        //     )
+        // }
+    }
+
+    onSelect = (item: any, option: number) => {
+        console.log('item', item);
+        console.log('option', option);
+        this.setState({questions: this.state.questions.map(item => {
+            return {...item, option};
+        })})        
+        console.log(this.state.questions);
     }
 
     render() {
-        const { empresa, setor } = this.state;
+        const { empresa, setor, questions } = this.state;
         return (
             <View style={style.screen}>
                 <Text style={style.titleRazaoSocial}>
-                    {empresa.razaoSocial}
+                    {empresa.razaoSocial} - {setor}
                 </Text>
                 <Text style={style.titleCnpj}>
                     {empresa.cnpj}
-                </Text>
-                <Text style={style.titleSetor}>
-                    {setor}
                 </Text>
                 <View style={style.contentList}>
                     <SafeAreaView>
                         <FlatList
                             data={questions}
+                            extraData={questions}
                             keyExtractor={(question: any) => question.id}
-                            renderItem={({ item, index, separators }) => (
-                                <Question item={item} />
+                            renderItem={({ item }) => (
+                                <Question
+                                    item={item}
+                                    onSelect={this.onSelect}
+                                />
                             )}
                         />
                     </SafeAreaView>
@@ -211,21 +217,25 @@ const style = StyleSheet.create({
         flex: 9
     },
     footer: {
-        backgroundColor: 'transparent',
-        shadowOpacity: 0.8,
-        borderColor: 'black',
-        elevation: 50
+        flexDirection: 'row'
     },
     button: {
-        shadowOpacity: 0.9,
+        flex: 1,
+        backgroundColor: '#488aff',
+        borderRadius: 10,
         alignSelf: 'center',
-        margin: 15
+        width: wp('100%'),
+        height: hp('6%'),
+        marginHorizontal: wp('2%'),
+        marginVertical: hp('1%'),
     },
     textButton: {
+        flex: 1,
         alignSelf: 'center',
         fontSize: 20,
         textAlign: 'center',
-        color: 'green',
+        textAlignVertical: 'center',
+        color: 'white',
         fontWeight: 'bold'
     }
 })

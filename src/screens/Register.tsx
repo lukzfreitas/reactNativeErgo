@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { StyleSheet, TextInput, ScrollView, TouchableOpacity, Text, Dimensions, AsyncStorage } from 'react-native';
+import { StyleSheet, TextInput, ScrollView, TouchableOpacity, Text } from 'react-native';
 import { TextInputMask } from 'react-native-masked-text';
 import { NavigationScreenProp, NavigationState, NavigationParams } from 'react-navigation';
 import DateTimePicker from '@react-native-community/datetimepicker';
@@ -7,6 +7,12 @@ import { If } from '../commons';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faCalendarAlt } from '@fortawesome/free-regular-svg-icons';
 import { RealmService } from '../services'
+import {
+    widthPercentageToDP as wp,
+    heightPercentageToDP as hp,
+    listenOrientationChange as loc,
+    removeOrientationListener as rol
+} from 'react-native-responsive-screen';
 
 interface Props {
     navigation: NavigationScreenProp<NavigationState, NavigationParams>;
@@ -20,17 +26,12 @@ interface State {
     invalidSetor: boolean;
     dateQuestion: any;
     empresaExist: boolean;
-    portrait: boolean;
 }
 
 export class Register extends Component<Props, State> {
 
     constructor(props: Props) {
         super(props);
-        const isPortrait = () => {
-            const dim = Dimensions.get('screen');
-            return dim.height >= dim.width;
-        };
         this.state = {
             empresa: { cnpj: '', razaoSocial: '' },
             invalidCnpj: false,
@@ -39,13 +40,7 @@ export class Register extends Component<Props, State> {
             empresaExist: false,
             invalidSetor: false,
             dateQuestion: { date: new Date(), mode: 'date', show: false },
-            portrait: isPortrait()
         };
-        Dimensions.addEventListener('change', () => {
-            this.setState({
-                portrait: isPortrait()
-            });
-        });
     }
 
     openDatePicker = () => {
@@ -80,8 +75,12 @@ export class Register extends Component<Props, State> {
     save = async () => {
         if (this.isValidForm()) {
             const empresaSchema = { cnpj: this.state.empresa.cnpj, nome: this.state.empresa.razaoSocial, setor: this.state.setor };
-            await this.saveEmpresa(empresaSchema);            
-            this.props.navigation.navigate('FormQuestion', {empresa: this.state.empresa, setor: this.state.setor, mes: this.state.dateQuestion});
+            await this.saveEmpresa(empresaSchema);
+            this.props.navigation.navigate('FormQuestion', {
+                empresa: this.state.empresa,
+                setor: this.state.setor,
+                mes: this.state.dateQuestion.date.getMonth() + 1 + '/' + this.state.dateQuestion.date.getFullYear()
+            });
             this.setState(state => { return { ...state, empresa: { ...state.empresa, razaoSocial: '', cnpj: '' }, setor: '', empresaExist: false } });
         }
     }
@@ -115,12 +114,12 @@ export class Register extends Component<Props, State> {
     }
 
     render() {
-        const { empresa, invalidCnpj, invalidRazaoSocial, setor, invalidSetor, dateQuestion, portrait } = this.state;
+        const { empresa, invalidCnpj, invalidRazaoSocial, setor, invalidSetor, dateQuestion } = this.state;
         return (
             <ScrollView style={style.screen}>
                 <TextInputMask
                     type={'cnpj'}
-                    style={portrait ? style.textInput : style.textInputLandscape}
+                    style={style.textInput}
                     value={empresa.cnpj}
                     underlineColorAndroid={invalidCnpj ? 'red' : '#008030'}
                     placeholder={invalidCnpj ? 'CNPJ não informado' : 'Informe o CNPJ'}
@@ -130,7 +129,7 @@ export class Register extends Component<Props, State> {
                     onBlur={() => this.findEmpresa()}
                 />
                 <TextInput
-                    style={portrait ? style.textInput : style.textInputLandscape}
+                    style={style.textInput}
                     value={empresa.razaoSocial}
                     underlineColorAndroid={invalidRazaoSocial ? 'red' : '#008030'}
                     placeholder={invalidRazaoSocial ? 'Razão social não informada' : 'Informe a razão social'}
@@ -139,7 +138,7 @@ export class Register extends Component<Props, State> {
                     onChange={() => this.setState({ invalidRazaoSocial: false })}
                 />
                 <TextInput
-                    style={portrait ? style.textInput : style.textInputLandscape}
+                    style={style.textInput}
                     value={setor}
                     underlineColorAndroid={invalidSetor ? 'red' : '#008030'}
                     placeholder={invalidSetor ? 'Setor não informado' : 'Informe o setor'}
@@ -155,7 +154,7 @@ export class Register extends Component<Props, State> {
                     onPress={() => this.openDatePicker()}
                 />
                 <TextInput
-                    style={portrait ? style.textInput : style.textInputLandscape}
+                    style={style.textInput}
                     value={dateQuestion.date.getMonth() + 1 + '/' + dateQuestion.date.getFullYear() + ' - Data do questionário '}
                     underlineColorAndroid='#008030'
                     placeholder='Selecione a data'
@@ -188,14 +187,8 @@ const style = StyleSheet.create({
     textInput: {
         flex: 1,
         alignSelf: 'center',
-        width: 600,
-        marginVertical: 30,        
-    },
-    textInputLandscape: {
-        flex: 1,
-        alignSelf: 'center',
-        width: 800,
-        marginVertical: 10
+        width: wp('90%'),
+        marginVertical: 20,
     },
     calendar: {
         alignSelf: 'center',
@@ -209,12 +202,14 @@ const style = StyleSheet.create({
         shadowOpacity: 0.9,
         marginVertical: 10,
         alignSelf: 'center',
-        width: 120,
-        height: 40
+        width: wp('20%'),
+        height: hp('5%')
     },
     textButton: {
+        flex: 1,
         color: 'white',
         textAlignVertical: 'center',
+        alignSelf: 'center',
         textAlign: 'center',
         fontSize: 20
     }

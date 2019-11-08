@@ -1,7 +1,7 @@
 import React from 'react'
 import { createAppContainer } from 'react-navigation'
 import { createStackNavigator } from 'react-navigation-stack'
-import { Login, Register, FormQuestion } from './src/screens'
+import { Login, Register, FormQuestion, Reload } from './src/screens'
 
 const App = createAppContainer(
   createStackNavigator({
@@ -33,7 +33,18 @@ const App = createAppContainer(
         },
         headerTintColor: '#008030'
       })
-    }
+    },
+    Reload: {
+      screen: Reload,
+      navigationOptions: () => ({
+        title: 'Questionário',
+        headerLeft: null,
+        headerTitleStyle: {
+          fontWeight: 'bold'
+        },
+        headerTintColor: '#008030'
+      })
+    },
   }, {
     navigationOptions: {
       headerStyle: {
