@@ -1,5 +1,5 @@
-import React, { Component, PureComponent } from 'react';
-import { StyleSheet, View, Text, Dimensions, DeviceEventEmitter } from 'react-native'
+import React, { PureComponent } from 'react';
+import { StyleSheet, View, Text, Dimensions } from 'react-native'
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faAngry, faFrownOpen, faMeh, faSmile, faSmileBeam } from '@fortawesome/free-regular-svg-icons'
 import Slider from '@react-native-community/slider';
@@ -17,16 +17,15 @@ interface Props {
 }
 
 interface State {
+    sliderColor: string;
     item: any;
-    sliderColor: string,
-    eventEmitter: any
 }
 
 export class Question extends PureComponent<Props, State> {
 
     constructor(props: Props) {
         super(props);
-        this.state = {  item: props.item, sliderColor: 'gray', eventEmitter: null }
+        this.state = { item: props.item, sliderColor: 'gray' }
     }
 
     getScreenInfo = () => {
@@ -34,32 +33,43 @@ export class Question extends PureComponent<Props, State> {
         return dim;
     }
 
-    changeQuestion = (option: number) => {
+    changeQuestion = (option: number) => {        
         switch (option) {
             case 1:
-                this.setState(state => { return { ...state, item: { ...state.item, option: 1, selected: true}, sliderColor: 'red' }});
+                this.setState(state => { return { ...state, item: { ...state.item, option: 1 }, sliderColor: 'red' } });
+                this.props.item.option = 1;
+                this.props.item.sliderColor = 'red';
                 break;
             case 2:
-                this.setState(state => { return { ...state, item: { ...state.item, option: 2, selected: true}, sliderColor: 'orange' }});
+                this.setState(state => { return { ...state, item: { ...state.item, option: 2 }, sliderColor: 'orange' } });
+                this.props.item.option = 2;
+                this.props.item.sliderColor = 'orange';
                 break;
             case 3:
-                this.setState(state => { return { ...state, item: { ...state.item, option: 3, selected: true}, sliderColor: 'gold'}});
+                this.setState(state => { return { ...state, item: { ...state.item, option: 3 }, sliderColor: 'gold' } });
+                this.props.item.option = 3;
+                this.props.item.sliderColor = 'gold';
                 break;
             case 4:
-                this.setState(state => { return { ...state, item: { ...state.item, option: 4, selected: true}, sliderColor: 'lightblue'}});
+                this.setState(state => { return { ...state, item: { ...state.item, option: 4 }, sliderColor: 'lightblue' } });
+                this.props.item.option = 4;
+                this.props.item.sliderColor = 'lightblue';
                 break;
             case 5:
-                this.setState(state => { return { ...state, item: { ...state.item, option: 5, selected: true}, sliderColor: 'green'}});                
+                this.setState(state => { return { ...state, item: { ...state.item, option: 5 }, sliderColor: 'green' } });
+                this.props.item.option = 5;
+                this.props.item.sliderColor = 'green';
                 break;
             default:
-                    this.setState(state => { return { ...state, item: { ...state.item, option: 1, selected: false}, sliderColor: 'gray'}});                
+                this.setState(state => { return { ...state, item: { ...state.item, option: 1 }, sliderColor: 'gray' } });
+                this.props.item.option = 1;
+                this.props.item.sliderColor = 'gray';
                 break;
-        }        
-    }    
+        }
+    }
 
     render() {
-        const { onSelect } = this.props;
-        const { sliderColor, item } = this.state;
+        const { onSelect, item } = this.props;        
         return (
             <View>
                 <Text style={style.question} key={item.id}>{item.description}</Text>
@@ -70,7 +80,7 @@ export class Question extends PureComponent<Props, State> {
                             icon={faAngry}
                             size={40}
                             color='red'
-                            onPress={() => {onSelect(item, 1); this.changeQuestion(1)}}                        
+                            onPress={() => { onSelect(item, 1); this.changeQuestion(1) }}
                         />
                         <If condition={this.getScreenInfo().width > 360}>
                             <Text style={style.textSmile}>Discordo{"\n"}Totalmente</Text>
@@ -83,7 +93,7 @@ export class Question extends PureComponent<Props, State> {
                             icon={faFrownOpen}
                             size={40}
                             color='orange'
-                            onPress={() => {onSelect(item, 2); this.changeQuestion(2)}}                        
+                            onPress={() => { onSelect(item, 2); this.changeQuestion(2) }}
                         />
                         <If condition={this.getScreenInfo().width > 360}>
                             <Text style={style.textSmile}>Discordo{"\n"}Parcialmente</Text>
@@ -96,7 +106,7 @@ export class Question extends PureComponent<Props, State> {
                             icon={faMeh}
                             size={40}
                             color='gold'
-                            onPress={() => {onSelect(item, 3); this.changeQuestion(3)}}                        
+                            onPress={() => { onSelect(item, 3); this.changeQuestion(3) }}
                         />
                         <If condition={this.getScreenInfo().width > 360}>
                             <Text style={style.textSmile}>Indiferente{"\n"}</Text>
@@ -109,7 +119,7 @@ export class Question extends PureComponent<Props, State> {
                             icon={faSmile}
                             size={40}
                             color='lightblue'
-                            onPress={() => {onSelect(item, 4); this.changeQuestion(4)}}
+                            onPress={() => { onSelect(item, 4); this.changeQuestion(4) }}
                         />
                         <If condition={this.getScreenInfo().width > 360}>
                             <Text style={style.textSmile}>Condordo{"\n"}Parcialmente</Text>
@@ -122,7 +132,7 @@ export class Question extends PureComponent<Props, State> {
                             icon={faSmileBeam}
                             size={40}
                             color='green'
-                            onPress={() => {onSelect(item, 5); this.changeQuestion(5)}}
+                            onPress={() => { onSelect(item, 5); this.changeQuestion(5) }}
                         />
                         <If condition={this.getScreenInfo().width > 360}>
                             <Text style={style.textSmile}>Condordo{"\n"}Totalmente</Text>
@@ -134,9 +144,9 @@ export class Question extends PureComponent<Props, State> {
                     value={item.option}
                     minimumValue={1}
                     maximumValue={5}
-                    thumbTintColor={sliderColor}
+                    thumbTintColor={item.sliderColor}
                     step={1}
-                    onValueChange={() => {onSelect(item, item.option); this.changeQuestion(item.option)}}
+                    onValueChange={(option: number) => { onSelect(item, option); this.changeQuestion(option) }}
                 />
             </View>
         )
