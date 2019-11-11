@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { NavigationScreenProp, NavigationState, NavigationParams } from 'react-navigation';
 import { HeaderBackButton } from 'react-navigation-stack'
-import { Question } from '../components';
+import { QuestionScaleLikert, QuestionDefault } from '../components';
 import { RealmService } from '../services';
 import {
     BackHandler,
@@ -13,7 +13,8 @@ import {
     View,
     Alert,
     ToastAndroid,
-    ActivityIndicator
+    ActivityIndicator,
+    Switch
 } from 'react-native';
 import {
     widthPercentageToDP as wp,
@@ -34,6 +35,7 @@ interface State {
     mes: string;
     questions: any[];
     loading: boolean;
+    questionsDefault: boolean;
     questionsSelected: any;
     backHandler: any;
 }
@@ -49,6 +51,7 @@ export class FormQuestion extends Component<Props, State> {
             mes: props.navigation.getParam('mes'),
             questions: require('../assets/questions.json').data,
             loading: false,
+            questionsDefault: true,
             questionsSelected: new Map(),
             backHandler: null,
         };
@@ -126,9 +129,9 @@ export class FormQuestion extends Component<Props, State> {
                 [
                     { text: 'Não', onPress: () => console.log('cancelado') },
                     {
-                        text: 'Sim', onPress: async () => {                            
+                        text: 'Sim', onPress: async () => {
                             await this.saveQuestions();
-                            this.setState({loading: false});
+                            this.setState({ loading: false });
                             ToastAndroid.showWithGravity(
                                 'Questionário Salvo com sucesso',
                                 ToastAndroid.LONG,
@@ -147,7 +150,7 @@ export class FormQuestion extends Component<Props, State> {
     }
 
     private saveQuestions = async () => {
-        this.setState({loading: true});
+        this.setState({ loading: true });
         let questionsSchema = this.state.questions.reduce((object: any, question: any) => {
             object['q' + question.id] = question.option
             return object;
@@ -163,15 +166,26 @@ export class FormQuestion extends Component<Props, State> {
     }
 
     render() {
-        const { empresa, setor, questions, loading } = this.state;
+        const { empresa, setor, questions, loading, questionsDefault } = this.state;
         return (
             <View style={style.screen}>
-                <Text style={style.titleRazaoSocial}>
-                    {empresa.razaoSocial} - {setor}
-                </Text>
-                <Text style={style.titleCnpj}>
-                    {empresa.cnpj}
-                </Text>
+                <View style={style.header}>
+                    <Text style={style.titleRazaoSocial}>
+                        {empresa.razaoSocial} - {setor}
+                    </Text>
+                    <Text style={style.titleCnpj}>
+                        {empresa.cnpj}
+                    </Text>
+                    <View style={style.switch}>
+                        <Text style={style.textQuestionDefault}> Questionário Padrão </Text>
+                        <Switch
+                            onValueChange={() => this.setState({ questionsDefault: !questionsDefault })}
+                            value={!questionsDefault}
+                        />
+                        <Text style={style.textQuestionLikert}> Questionário Escala Likert </Text>
+                    </View>
+
+                </View>
                 <View style={style.contentList}>
                     <If condition={loading}>
                         <ActivityIndicator
@@ -180,21 +194,39 @@ export class FormQuestion extends Component<Props, State> {
                             size="large"
                         />
                     </If>
-                    <If condition={!loading}>
+                    <If condition={questionsDefault}>
                         <SafeAreaView>
                             <FlatList
                                 data={questions}
                                 extraData={questions}
                                 keyExtractor={(question: any) => question.id}
                                 renderItem={({ item }) => (
-                                    <Question
+                                    <QuestionDefault
                                         item={item}
                                         onSelect={this.onSelect}
                                     />
                                 )}
                             />
-                        </SafeAreaView>
+                        </SafeAreaView>                        
                     </If>
+                    <If condition={!questionsDefault}>
+                        <If condition={!loading}>
+                            <SafeAreaView>
+                                <FlatList
+                                    data={questions}
+                                    extraData={questions}
+                                    keyExtractor={(question: any) => question.id}
+                                    renderItem={({ item }) => (
+                                        <QuestionScaleLikert
+                                            item={item}
+                                            onSelect={this.onSelect}
+                                        />
+                                    )}
+                                />
+                            </SafeAreaView>
+                        </If>
+                    </If>
+
                 </View>
                 <View style={style.footer}>
                     <TouchableOpacity style={style.button} onPress={this.submit} >
@@ -211,14 +243,40 @@ const style = StyleSheet.create({
         flex: 10,
         flexDirection: 'column'
     },
+    header: {
+        flex: 1,
+        alignItems: 'center'
+    },
+    switch: {
+        flex: 1,
+        flexDirection: 'row'
+    },
+    textQuestionDefault: {
+        alignItems: 'center',
+        alignContent: 'center',
+        alignSelf: 'center',
+        margin: 20,
+        fontSize: 20,
+        color: 'gray',
+        fontWeight: 'bold'
+    },
+    textQuestionLikert: {
+        alignItems: 'center',
+        alignContent: 'center',
+        alignSelf: 'center',
+        margin: 20,
+        fontSize: 20,
+        color: 'green',
+        fontWeight: 'bold'
+    },
     titleRazaoSocial: {
         alignSelf: 'center',
-        fontSize: 20,
+        fontSize: 30,
         fontWeight: 'bold'
     },
     titleCnpj: {
         alignSelf: 'center',
-        fontSize: 15,
+        fontSize: 20,
         fontWeight: 'bold'
     },
     titleSetor: {

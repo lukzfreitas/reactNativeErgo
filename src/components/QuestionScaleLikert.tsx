@@ -21,7 +21,7 @@ interface State {
     item: any;
 }
 
-export class Question extends PureComponent<Props, State> {
+export class QuestionScaleLikert extends PureComponent<Props, State> {
 
     constructor(props: Props) {
         super(props);

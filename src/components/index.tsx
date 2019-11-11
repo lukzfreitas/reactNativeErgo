@@ -1,1 +1,2 @@
-export * from './Question';
+export * from './QuestionScaleLikert';
+export * from './QuestionDefault';
