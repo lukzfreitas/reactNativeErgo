@@ -33,43 +33,43 @@ export class QuestionScaleLikert extends PureComponent<Props, State> {
         return dim;
     }
 
-    changeQuestion = (option: number) => {        
+    changeQuestion = (option: string) => {
         switch (option) {
-            case 1:
-                this.setState(state => { return { ...state, item: { ...state.item, option: 1 }, sliderColor: 'red' } });
-                this.props.item.option = 1;
+            case "1":
+                this.setState(state => { return { ...state, item: { ...state.item, option: '1', sliderColor: 'red' } } });
+                this.props.item.option = '1';
                 this.props.item.sliderColor = 'red';
                 break;
-            case 2:
-                this.setState(state => { return { ...state, item: { ...state.item, option: 2 }, sliderColor: 'orange' } });
-                this.props.item.option = 2;
+            case "2":
+                this.setState(state => { return { ...state, item: { ...state.item, option: '2', sliderColor: 'orange' } } });
+                this.props.item.option = '2';
                 this.props.item.sliderColor = 'orange';
                 break;
-            case 3:
-                this.setState(state => { return { ...state, item: { ...state.item, option: 3 }, sliderColor: 'gold' } });
-                this.props.item.option = 3;
+            case "3":
+                this.setState(state => { return { ...state, item: { ...state.item, option: '3', sliderColor: 'gold' } } });
+                this.props.item.option = '3';
                 this.props.item.sliderColor = 'gold';
                 break;
-            case 4:
-                this.setState(state => { return { ...state, item: { ...state.item, option: 4 }, sliderColor: 'lightblue' } });
-                this.props.item.option = 4;
+            case "4":
+                this.setState(state => { return { ...state, item: { ...state.item, option: '4', sliderColor: 'lightblue' } } });
+                this.props.item.option = '4';
                 this.props.item.sliderColor = 'lightblue';
                 break;
-            case 5:
-                this.setState(state => { return { ...state, item: { ...state.item, option: 5 }, sliderColor: 'green' } });
-                this.props.item.option = 5;
+            case "5":
+                this.setState(state => { return { ...state, item: { ...state.item, option: '5', sliderColor: 'green' } } });
+                this.props.item.option = '5';
                 this.props.item.sliderColor = 'green';
                 break;
             default:
-                this.setState(state => { return { ...state, item: { ...state.item, option: 1 }, sliderColor: 'gray' } });
-                this.props.item.option = 1;
+                this.setState(state => { return { ...state, item: { ...state.item, option: '0', sliderColor: 'gray' } } });
+                this.props.item.option = '0';
                 this.props.item.sliderColor = 'gray';
                 break;
         }
     }
 
     render() {
-        const { onSelect, item } = this.props;        
+        const { onSelect, item } = this.props;
         return (
             <View>
                 <Text style={style.question} key={item.id}>{item.description}</Text>
@@ -80,7 +80,7 @@ export class QuestionScaleLikert extends PureComponent<Props, State> {
                             icon={faAngry}
                             size={40}
                             color='red'
-                            onPress={() => { onSelect(item, 1); this.changeQuestion(1) }}
+                            onPress={() => { onSelect(item, '1'); this.changeQuestion('1') }}
                         />
                         <If condition={this.getScreenInfo().width > 360}>
                             <Text style={style.textSmile}>Discordo{"\n"}Totalmente</Text>
@@ -93,7 +93,7 @@ export class QuestionScaleLikert extends PureComponent<Props, State> {
                             icon={faFrownOpen}
                             size={40}
                             color='orange'
-                            onPress={() => { onSelect(item, 2); this.changeQuestion(2) }}
+                            onPress={() => { onSelect(item, '2'); this.changeQuestion('2') }}
                         />
                         <If condition={this.getScreenInfo().width > 360}>
                             <Text style={style.textSmile}>Discordo{"\n"}Parcialmente</Text>
@@ -106,7 +106,7 @@ export class QuestionScaleLikert extends PureComponent<Props, State> {
                             icon={faMeh}
                             size={40}
                             color='gold'
-                            onPress={() => { onSelect(item, 3); this.changeQuestion(3) }}
+                            onPress={() => { onSelect(item, '3'); this.changeQuestion('3') }}
                         />
                         <If condition={this.getScreenInfo().width > 360}>
                             <Text style={style.textSmile}>Indiferente{"\n"}</Text>
@@ -119,7 +119,7 @@ export class QuestionScaleLikert extends PureComponent<Props, State> {
                             icon={faSmile}
                             size={40}
                             color='lightblue'
-                            onPress={() => { onSelect(item, 4); this.changeQuestion(4) }}
+                            onPress={() => { onSelect(item, '4'); this.changeQuestion('4') }}
                         />
                         <If condition={this.getScreenInfo().width > 360}>
                             <Text style={style.textSmile}>Condordo{"\n"}Parcialmente</Text>
@@ -132,7 +132,7 @@ export class QuestionScaleLikert extends PureComponent<Props, State> {
                             icon={faSmileBeam}
                             size={40}
                             color='green'
-                            onPress={() => { onSelect(item, 5); this.changeQuestion(5) }}
+                            onPress={() => { onSelect(item, '5'); this.changeQuestion('5') }}
                         />
                         <If condition={this.getScreenInfo().width > 360}>
                             <Text style={style.textSmile}>Condordo{"\n"}Totalmente</Text>
@@ -141,12 +141,12 @@ export class QuestionScaleLikert extends PureComponent<Props, State> {
                 </View>
                 <Slider
                     style={this.getScreenInfo().width > 360 ? style.sliderLandscape : style.sliderPortrait}
-                    value={item.option}
+                    value={parseInt(item.option)}
                     minimumValue={1}
                     maximumValue={5}
                     thumbTintColor={item.sliderColor}
                     step={1}
-                    onValueChange={(option: number) => { onSelect(item, option); this.changeQuestion(option) }}
+                    onValueChange={(option: number) => { onSelect(item, option); this.changeQuestion(option.toString()) }}
                 />
             </View>
         )

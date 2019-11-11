@@ -3,210 +3,210 @@
         {
             "id": "1",
             "description": "1 - Posso decidir quando fazer uma pausa",
-            "option": 0,
+            "option": "0",
             "sliderColor" : "gray"
         },
         {
             "id": "2",
             "description": "2 - Posso decidir sobre meu ritmo de trabalho",
-            "option": 0,
+            "option": "0",
             "sliderColor" : "gray"            
         },
         {
             "id": "3",
             "description": "3 - Recebo ordens contraditórias em meu trabalho",
-            "option": 0,
+            "option": "0",
             "sliderColor" : "gray"
         },
         {
             "id": "4",
             "description": "4 - Posso decidir o que fazer em meu trabalho",
-            "option": 0,
+            "option": "0",
             "sliderColor" : "gray"
         },
         {
             "id": "5",
             "description": "5 - Posso decidir como fazer o meu trabalho",
-            "option": 0,
+            "option": "0",
             "sliderColor" : "gray"
         },
         {
             "id": "6",
             "description": "6 - Tenho prazos difíceis de cumprir",
-            "option": 0,
+            "option": "0",
             "sliderColor" : "gray"
         },
         {
             "id": "7",
             "description": "7 - O ritmo de meu trabalho me permite fazer pausas suficientes",
-            "option": 0,
+            "option": "0",
             "sliderColor" : "gray"
         },
         {
             "id": "8",
             "description": "8 - Sou consultado sobre mudanças no trabalho",
-            "option": 0,
+            "option": "0",
             "sliderColor" : "gray"
         },
         {
             "id": "9",
             "description": "9 - Quando algo muda no trabalho, sei o que mudará na prática",
-            "option": 0,
+            "option": "0",
             "sliderColor" : "gray"
         },
         {
             "id": "10",
             "description": "10 - Me sinto pressionado a trabalhar horas a mais, ultrapassando minha jornada de trabalho",
-            "option": 0,
+            "option": "0",
             "sliderColor" : "gray"
         },
         {
             "id": "11",
             "description": "11 - Me sinto pressionado para fazer muito trabalho em pouco tempo",
-            "option": 0
+            "option": "0"
         },
         {
             "id": "12",
             "description": "12 - Sei o que é esperado de mim no trabalho",
-            "option": 0,
+            "option": "0",
             "sliderColor" : "gray"
         },
         {
             "id": "13",
             "description": "13 - Sei o que necessito para fazer o meu trabalho",
-            "option": 0,
+            "option": "0",
             "sliderColor" : "gray"
         },
         {
             "id": "14",
             "description": "14 - Tenho que trabalhar muito depressa",
-            "option": 0,
+            "option": "0",
             "sliderColor" : "gray"
         },
         {
             "id": "15",
             "description": "15 - Tenho tudo o que necessito para fazer o meu trabalho",
-            "option": 0,
+            "option": "0",
             "sliderColor" : "gray"
         },
         {
             "id": "16",
             "description": "16 - Sei as metas do meu trabalho",
-            "option": 0,
+            "option": "0",
             "sliderColor" : "gray"
         },
         {
             "id": "17",
             "description": "17 - Tenho responsabilidades no meu trabalho além do meu limite",
-            "option": 0,
+            "option": "0",
             "sliderColor" : "gray"
         },
         {
             "id": "18",
             "description": "18 - Tenho ajuda e apoio necessário dos colegas no trabalho",
-            "option": 0,
+            "option": "0",
             "sliderColor" : "gray"
         },
         {
             "id": "19",
             "description": "19 - Há desentendimento entre os colegas no meu setor de trabalho",
-            "option": 0,
+            "option": "0",
             "sliderColor" : "gray"
         },
         {
             "id": "20",
             "description": "20 - Sou respeitado por meus colegas de trabalho",
-            "option": 0,
+            "option": "0",
             "sliderColor" : "gray"
         },
         {
             "id": "21",
             "description": "21 - Recebo retorno dos superiores sobre o trabalho que faço",
-            "option": 0,
+            "option": "0",
             "sliderColor" : "gray"
         },
         {
             "id": "22",
             "description": "22 - Posso falar com o meu chefe imediato sobre algo no trabalho que me incomodou",
-            "option": 0,
+            "option": "0",
             "sliderColor" : "gray"
         },
         {
             "id": "23",
             "description": "23 - Sou respeitado pelo meu chefe/líder imediato",
-            "option": 0,
+            "option": "0",
             "sliderColor" : "gray"
         },
         {
             "id": "24",
             "description": "24 - Recebo apoio e ajuda do meu chefe imediato durante meu trabalho",
-            "option": 0,
+            "option": "0",
             "sliderColor" : "gray"
         },
         {
             "id": "25",
             "description": "25 - Sinto que tenho suporte das gerências, caso necessite",
-            "option": 0,
+            "option": "0",
             "sliderColor" : "gray"
         },
         {
             "id": "26",
             "description": "26 - Me sinto injustiçado no trabalho",
-            "option": 0,
+            "option": "0",
             "sliderColor" : "gray"
         },
         {
             "id": "27",
             "description": "27 - A atividade que realizo atualmente no trabalho está de acordo com a minha formação/ experiência/ desempenho",
-            "option": 0,
+            "option": "0",
             "sliderColor" : "gray"
         },
         {
             "id": "28",
             "description": "28 - Vejo poucas possibilidades de ser promovido no futuro",
-            "option": 0,
+            "option": "0",
             "sliderColor" : "gray"
         },
         {
             "id": "29",
             "description": "29 - Levando em conta todo o meu esforço e conquistas, meu salário está adequado",
-            "option": 0,
+            "option": "0",
             "sliderColor" : "gray"
         },
         {
             "id": "30",
             "description": "30 - Sinto que posso ser demitido a qualquer momento",
-            "option": 0,
+            "option": "0",
             "sliderColor" : "gray"
         },
         {
             "id": "31",
             "description": "31 - Em casa, consigo relaxar e 'me desligar' facilmente do meu trabalho",
-            "option": 0,
+            "option": "0",
             "sliderColor" : "gray"
         },
         {
             "id": "32",
             "description": "32 - Eu me sacrifico a minha vida pessoal por causa do meu trabalho",
-            "option": 0,
+            "option": "0",
             "sliderColor" : "gray"
         },
         {
             "id": "33",
             "description": "33 - Vejo sentido nas tarefas que realizo",
-            "option": 0,
+            "option": "0",
             "sliderColor" : "gray"
         },
         {
             "id": "34",
             "description": "34 - Sinto que meu trabalho prejudica o meu sono",
-            "option": 0,
+            "option": "0",
             "sliderColor" : "gray"
         },
         {
             "id": "35",
             "description": "35 - Me sinto satisfeito/realizado no meu trabalho",
-            "option": 0,
+            "option": "0",
             "sliderColor" : "gray"
         }
     ]

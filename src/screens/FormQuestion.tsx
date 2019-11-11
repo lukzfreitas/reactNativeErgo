@@ -60,7 +60,7 @@ export class FormQuestion extends Component<Props, State> {
 
     componentDidMount() {
         let questions = this.state.questions.map((question: any) => {
-            return { ...question, option: 0 };
+            return { ...question, option: '0' };
         })
         let questionsSelected: any = this.state.questionsSelected;
         this.state.questions.map((question: any) => {
@@ -104,7 +104,7 @@ export class FormQuestion extends Component<Props, State> {
         }
     }
 
-    onSelect = (item: any, option: number) => {
+    onSelect = (item: any, option: string) => {
         let questionsSelected: any = this.state.questionsSelected;
         questionsSelected.set(item.id, { ...item, option })
         this.setState({ questionsSelected });
@@ -113,7 +113,7 @@ export class FormQuestion extends Component<Props, State> {
     submit = () => {
         let questionsNotSelected: string[] = [];
         for (var question of this.state.questionsSelected.values()) {
-            if (question.option === 0) {
+            if (question.option === '0') {
                 questionsNotSelected.push("Questão " + question.id);
             }
         }
@@ -152,7 +152,7 @@ export class FormQuestion extends Component<Props, State> {
     private saveQuestions = async () => {
         this.setState({ loading: true });
         let questionsSchema = this.state.questions.reduce((object: any, question: any) => {
-            object['q' + question.id] = question.option
+            object['q' + question.id] = parseInt(question.option);
             return object;
         }, {});
 
@@ -163,6 +163,15 @@ export class FormQuestion extends Component<Props, State> {
         realm.write(() => {
             realm.create('QuestionarioSchema', questionsSchema);
         });
+    }
+
+    changeQuestionDefault() {
+        this.setState({ questionsDefault: !this.state.questionsDefault });
+        this.setState({ loading: true });
+        setTimeout(() => {            
+            this.setState({ loading: false });
+        }, 1000);
+        
     }
 
     render() {
@@ -179,7 +188,7 @@ export class FormQuestion extends Component<Props, State> {
                     <View style={style.switch}>
                         <Text style={style.textQuestionDefault}> Questionário Padrão </Text>
                         <Switch
-                            onValueChange={() => this.setState({ questionsDefault: !questionsDefault })}
+                            onValueChange={() => this.changeQuestionDefault()}
                             value={!questionsDefault}
                         />
                         <Text style={style.textQuestionLikert}> Questionário Escala Likert </Text>
@@ -193,31 +202,17 @@ export class FormQuestion extends Component<Props, State> {
                             color="#48bb94"
                             size="large"
                         />
+                        <Text style={style.textLoading}> Carregando Questões... </Text>
                     </If>
-                    <If condition={questionsDefault}>
-                        <SafeAreaView>
-                            <FlatList
-                                data={questions}
-                                extraData={questions}
-                                keyExtractor={(question: any) => question.id}
-                                renderItem={({ item }) => (
-                                    <QuestionDefault
-                                        item={item}
-                                        onSelect={this.onSelect}
-                                    />
-                                )}
-                            />
-                        </SafeAreaView>                        
-                    </If>
-                    <If condition={!questionsDefault}>
-                        <If condition={!loading}>
+                    <If condition={!loading}>
+                        <If condition={questionsDefault}>
                             <SafeAreaView>
                                 <FlatList
                                     data={questions}
                                     extraData={questions}
                                     keyExtractor={(question: any) => question.id}
                                     renderItem={({ item }) => (
-                                        <QuestionScaleLikert
+                                        <QuestionDefault
                                             item={item}
                                             onSelect={this.onSelect}
                                         />
@@ -225,8 +220,25 @@ export class FormQuestion extends Component<Props, State> {
                                 />
                             </SafeAreaView>
                         </If>
-                    </If>
+                        <If condition={!questionsDefault}>
+                            <If condition={!loading}>
+                                <SafeAreaView>
+                                    <FlatList
+                                        data={questions}
+                                        extraData={questions}
+                                        keyExtractor={(question: any) => question.id}
+                                        renderItem={({ item }) => (
+                                            <QuestionScaleLikert
+                                                item={item}
+                                                onSelect={this.onSelect}
+                                            />
+                                        )}
+                                    />
+                                </SafeAreaView>
+                            </If>
+                        </If>
 
+                    </If>
                 </View>
                 <View style={style.footer}>
                     <TouchableOpacity style={style.button} onPress={this.submit} >
@@ -266,6 +278,15 @@ const style = StyleSheet.create({
         alignSelf: 'center',
         margin: 20,
         fontSize: 20,
+        color: 'green',
+        fontWeight: 'bold'
+    },
+    textLoading: {
+        alignItems: 'center',
+        alignContent: 'center',
+        alignSelf: 'center',
+        margin: 10,
+        fontSize: 30,
         color: 'green',
         fontWeight: 'bold'
     },
