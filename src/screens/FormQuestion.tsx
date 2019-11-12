@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { NavigationScreenProp, NavigationState, NavigationParams } from 'react-navigation';
 import { HeaderBackButton } from 'react-navigation-stack'
 import { QuestionScaleLikert, QuestionDefault } from '../components';
-import { RealmService } from '../services';
+import { RealmService, AsyncStorageService } from '../services';
 import {
     BackHandler,
     SafeAreaView,
@@ -30,7 +30,8 @@ interface Props {
 }
 
 interface State {
-    empresa: any;
+    cnpj: string;
+    razaoSocial: string,
     setor: string;
     mes: string;
     questionsData: any[];
@@ -42,14 +43,13 @@ interface State {
 }
 
 export class FormQuestion extends Component<Props, State> {
-
-
     constructor(props: Props) {
-        super(props);
+        super(props);        
         this.state = {
-            empresa: props.navigation.getParam('empresa'),
-            setor: props.navigation.getParam('setor'),
-            mes: props.navigation.getParam('mes'),
+            cnpj: '',
+            razaoSocial: '',
+            setor: '',
+            mes: '',
             questionsData: require('../assets/questions.json').data,
             questions: new Map(),
             questionsDefault: true,
@@ -60,7 +60,7 @@ export class FormQuestion extends Component<Props, State> {
         this.submit = this.submit.bind(this);
     }
 
-    componentDidMount() {
+    componentDidMount = async () => {
         let questionsData = this.state.questionsData.map((question: any) => {
             return { ...question, option: '0' };
         })
@@ -68,21 +68,25 @@ export class FormQuestion extends Component<Props, State> {
         this.state.questionsData.map((question: any) => {
             questions.set(question.id, question);
         })
+        const empresaStorage = await AsyncStorageService.getItem('empresa');                
         this.setState({
+            cnpj: empresaStorage.cnpj,
+            razaoSocial: empresaStorage.razaoSocial,
+            setor: empresaStorage.setor,
+            mes: empresaStorage.mes,
             questionsData,
             questions,
             backHandler: BackHandler.addEventListener('hardwareBackPress', () => {
-                if (this.state.questions.length > 0) {
-                    Alert.alert(
-                        'As questões respondidas não serão salvas',
-                        'Você deseja realmente sair?',
-                        [
-                            { text: 'Cancelar', onPress: () => console.log('cancelar') },
-                            { text: 'Sair', onPress: () => this.props.navigation.goBack() }
-                        ]
-                    );
-                    return true;
-                }
+                console.log('sair');
+                Alert.alert(
+                    'As questões respondidas não serão salvas',
+                    'Você deseja realmente sair?',
+                    [
+                        { text: 'Cancelar', onPress: () => console.log('cancelar') },
+                        { text: 'Sair', onPress: () => this.props.navigation.navigate('Register') }
+                    ]
+                );
+                return true;
             })
         });
     }
@@ -91,20 +95,20 @@ export class FormQuestion extends Component<Props, State> {
         this.state.backHandler.remove();
     }
 
-    public static navigationOptions = ({ navigation }: any) => {
-        return {
-            headerLeft: <HeaderBackButton onPress={() => {
-                Alert.alert(
-                    'As questões respondidas não serão salvas',
-                    'Você deseja realmente sair?',
-                    [
-                        { text: 'Cancelar', onPress: () => console.log('cancelar') },
-                        { text: 'Sair', onPress: () => navigation.goBack() }
-                    ]
-                );
-            }} />
-        }
-    }
+    // public static navigationOptions = ({ navigation }: any) => {
+    //     return {
+    //         headerLeft: <HeaderBackButton onPress={() => {
+    //             Alert.alert(
+    //                 'As questões respondidas não serão salvas',
+    //                 'Você deseja realmente sair?',
+    //                 [
+    //                     { text: 'Cancelar', onPress: () => console.log('cancelar') },
+    //                     { text: 'Sair', onPress: () => navigation.goBack() }
+    //                 ]
+    //             );
+    //         }} />
+    //     }
+    // }
 
     onSelect = (item: any, option: string) => {
         let questions: any = this.state.questions;
@@ -147,7 +151,7 @@ export class FormQuestion extends Component<Props, State> {
             return object;
         }, {});
 
-        questionsSchema.cnpj = this.state.empresa.cnpj;
+        questionsSchema.cnpj = this.state.cnpj;
         questionsSchema.setor = this.state.setor;
         questionsSchema.mes = this.state.mes;
         const realm = await RealmService.getRealm();
@@ -194,15 +198,15 @@ export class FormQuestion extends Component<Props, State> {
     }
 
     render() {
-        const { empresa, setor, questionsData, loading, textLoading, questionsDefault } = this.state;
+        const { cnpj, razaoSocial, setor, questionsData, loading, textLoading, questionsDefault } = this.state;
         return (
             <View style={style.screen}>
                 <View style={style.header}>
                     <Text style={style.titleRazaoSocial}>
-                        {empresa.razaoSocial} - {setor}
+                        {razaoSocial} - {setor}
                     </Text>
                     <Text style={style.titleCnpj}>
-                        {empresa.cnpj}
+                        {cnpj}
                     </Text>
                     <View style={style.switch}>
                         <Text style={style.textQuestionDefault}> Questionário Padrão </Text>
@@ -259,11 +263,13 @@ export class FormQuestion extends Component<Props, State> {
 
                     </If>
                 </View>
-                <View style={style.footer}>
-                    <TouchableOpacity style={style.button} onPress={this.submit} >
-                        <Text style={style.textButton}>Salvar Questionário</Text>
-                    </TouchableOpacity>
-                </View>
+                <If condition={!loading}>
+                    <View style={style.footer}>
+                        <TouchableOpacity style={style.button} onPress={this.submit} disabled={loading} >
+                            <Text style={style.textButton}>Salvar Questionário</Text>
+                        </TouchableOpacity>
+                    </View>
+                </If>
             </View>
         );
     }

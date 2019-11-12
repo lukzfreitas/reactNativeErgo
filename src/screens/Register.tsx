@@ -6,7 +6,7 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import { If } from '../commons';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faCalendarAlt } from '@fortawesome/free-regular-svg-icons';
-import { RealmService } from '../services'
+import { RealmService, AsyncStorageService } from '../services'
 import {
     widthPercentageToDP as wp,
     heightPercentageToDP as hp,
@@ -75,12 +75,15 @@ export class Register extends Component<Props, State> {
     save = async () => {
         if (this.isValidForm()) {
             const empresaSchema = { cnpj: this.state.empresa.cnpj, nome: this.state.empresa.razaoSocial, setor: this.state.setor };
-            await this.saveEmpresa(empresaSchema);
-            this.props.navigation.navigate('FormQuestion', {
-                empresa: this.state.empresa,
+            const empresaStorage = {
+                cnpj: this.state.empresa.cnpj,
+                razaoSocial: this.state.empresa.razaoSocial,
                 setor: this.state.setor,
-                mes: this.state.dateQuestion.date.getMonth() + 1 + '/' + this.state.dateQuestion.date.getFullYear()
-            });
+                mes: this.state.dateQuestion.date.getMonth() + 1 + '/' + this.state.dateQuestion.date.getFullYear(),
+            }
+            await this.saveEmpresa(empresaSchema);
+            await AsyncStorageService.saveItem('empresa', empresaStorage);
+            this.props.navigation.navigate('FormQuestion');
             this.setState(state => { return { ...state, empresa: { ...state.empresa, razaoSocial: '', cnpj: '' }, setor: '', empresaExist: false } });
         }
     }
