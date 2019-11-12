@@ -65,7 +65,7 @@ export class QuestionDefault extends PureComponent<Props, State> {
             <View>
                 <Text style={style.question} key={item.id}> {item.description} </Text>
                 <RadioButton.Group
-                    onValueChange={(option) => { onSelect(option, item), this.changeQuestion(option) }}
+                    onValueChange={(option) => { onSelect(item, option), this.changeQuestion(option) }}
                     value={item.option}
                 >
                     <View style={style.answer}>

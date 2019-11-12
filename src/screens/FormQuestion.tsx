@@ -33,10 +33,11 @@ interface State {
     empresa: any;
     setor: string;
     mes: string;
-    questions: any[];
-    loading: boolean;
+    questionsData: any[];
+    questions: any;
     questionsDefault: boolean;
-    questionsSelected: any;
+    loading: boolean;
+    textLoading: string;
     backHandler: any;
 }
 
@@ -49,28 +50,29 @@ export class FormQuestion extends Component<Props, State> {
             empresa: props.navigation.getParam('empresa'),
             setor: props.navigation.getParam('setor'),
             mes: props.navigation.getParam('mes'),
-            questions: require('../assets/questions.json').data,
-            loading: false,
+            questionsData: require('../assets/questions.json').data,
+            questions: new Map(),
             questionsDefault: true,
-            questionsSelected: new Map(),
+            loading: false,
+            textLoading: '',
             backHandler: null,
         };
         this.submit = this.submit.bind(this);
     }
 
     componentDidMount() {
-        let questions = this.state.questions.map((question: any) => {
+        let questionsData = this.state.questionsData.map((question: any) => {
             return { ...question, option: '0' };
         })
-        let questionsSelected: any = this.state.questionsSelected;
-        this.state.questions.map((question: any) => {
-            questionsSelected.set(question.id, question);
+        let questions: any = this.state.questions;
+        this.state.questionsData.map((question: any) => {
+            questions.set(question.id, question);
         })
         this.setState({
+            questionsData,
             questions,
-            questionsSelected,
             backHandler: BackHandler.addEventListener('hardwareBackPress', () => {
-                if (this.state.questionsSelected.length > 0) {
+                if (this.state.questions.length > 0) {
                     Alert.alert(
                         'As questões respondidas não serão salvas',
                         'Você deseja realmente sair?',
@@ -105,14 +107,14 @@ export class FormQuestion extends Component<Props, State> {
     }
 
     onSelect = (item: any, option: string) => {
-        let questionsSelected: any = this.state.questionsSelected;
-        questionsSelected.set(item.id, { ...item, option })
-        this.setState({ questionsSelected });
+        let questions: any = this.state.questions;
+        questions.set(item.id, { ...item, option })
+        this.setState({ questions });
     }
 
     submit = () => {
         let questionsNotSelected: string[] = [];
-        for (var question of this.state.questionsSelected.values()) {
+        for (var question of this.state.questions.values()) {
             if (question.option === '0') {
                 questionsNotSelected.push("Questão " + question.id);
             }
@@ -131,17 +133,6 @@ export class FormQuestion extends Component<Props, State> {
                     {
                         text: 'Sim', onPress: async () => {
                             await this.saveQuestions();
-                            this.setState({ loading: false });
-                            ToastAndroid.showWithGravity(
-                                'Questionário Salvo com sucesso',
-                                ToastAndroid.LONG,
-                                ToastAndroid.TOP
-                            )
-
-                            let questions = this.state.questions.map((question: any) => {
-                                return { ...question, option: 0, sliderColor: 'gray' }
-                            })
-                            this.setState({ questions, questionsSelected: new Map() });
                         }
                     }
                 ]
@@ -150,8 +141,8 @@ export class FormQuestion extends Component<Props, State> {
     }
 
     private saveQuestions = async () => {
-        this.setState({ loading: true });
-        let questionsSchema = this.state.questions.reduce((object: any, question: any) => {
+        this.setState({ loading: true, textLoading: 'Salvando Questionário...' });
+        let questionsSchema = this.state.questionsData.reduce((object: any, question: any) => {
             object['q' + question.id] = parseInt(question.option);
             return object;
         }, {});
@@ -160,22 +151,50 @@ export class FormQuestion extends Component<Props, State> {
         questionsSchema.setor = this.state.setor;
         questionsSchema.mes = this.state.mes;
         const realm = await RealmService.getRealm();
-        realm.write(() => {
-            realm.create('QuestionarioSchema', questionsSchema);
-        });
+        try {
+            realm.write(() => {
+                realm.create('QuestionarioSchema', questionsSchema);
+            });
+            let questions = new Map();
+            let questionsData = this.state.questionsData.map((question: any) => {
+                questions.set(question.id, { ...question, option: '0', sliderColor: 'gray' });
+                return { ...question, option: '0', sliderColor: 'gray' }
+            })
+            this.setState({ questionsData, questions });
+            setTimeout(() => {
+                this.setState({ loading: false, textLoading: '' });
+                ToastAndroid.showWithGravity(
+                    'Questionário salvo com sucesso',
+                    ToastAndroid.LONG,
+                    ToastAndroid.TOP
+                );
+            }, 1000);
+        } catch (exception) {
+            setTimeout(() => {
+                this.setState({ loading: false, textLoading: '' });
+                ToastAndroid.showWithGravity(
+                    'Ocorreu um erro ao tentar salvar o questionário',
+                    ToastAndroid.LONG,
+                    ToastAndroid.TOP
+                );
+            }, 1000);
+        }
+
     }
 
     changeQuestionDefault() {
-        this.setState({ questionsDefault: !this.state.questionsDefault });
-        this.setState({ loading: true });
-        setTimeout(() => {            
-            this.setState({ loading: false });
+        this.setState({
+            questionsDefault: !this.state.questionsDefault,
+            loading: true,
+            textLoading: 'Carregando Questões...'
+        });
+        setTimeout(() => {
+            this.setState({ loading: false, textLoading: '' });
         }, 1000);
-        
     }
 
     render() {
-        const { empresa, setor, questions, loading, questionsDefault } = this.state;
+        const { empresa, setor, questionsData, loading, textLoading, questionsDefault } = this.state;
         return (
             <View style={style.screen}>
                 <View style={style.header}>
@@ -202,14 +221,14 @@ export class FormQuestion extends Component<Props, State> {
                             color="#48bb94"
                             size="large"
                         />
-                        <Text style={style.textLoading}> Carregando Questões... </Text>
+                        <Text style={style.textLoading}> {textLoading} </Text>
                     </If>
                     <If condition={!loading}>
                         <If condition={questionsDefault}>
                             <SafeAreaView>
                                 <FlatList
-                                    data={questions}
-                                    extraData={questions}
+                                    data={questionsData}
+                                    extraData={questionsData}
                                     keyExtractor={(question: any) => question.id}
                                     renderItem={({ item }) => (
                                         <QuestionDefault
@@ -224,8 +243,8 @@ export class FormQuestion extends Component<Props, State> {
                             <If condition={!loading}>
                                 <SafeAreaView>
                                     <FlatList
-                                        data={questions}
-                                        extraData={questions}
+                                        data={questionsData}
+                                        extraData={questionsData}
                                         keyExtractor={(question: any) => question.id}
                                         renderItem={({ item }) => (
                                             <QuestionScaleLikert
