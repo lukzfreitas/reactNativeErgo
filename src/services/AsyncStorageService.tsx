@@ -14,7 +14,13 @@ export class AsyncStorageService extends Component {
     }
 
     static updateItem: any = async (nameStorage: string,  newObject: any) => {        
-        await AsyncStorage.mergeItem(nameStorage, JSON.stringify(newObject));        
+        await AsyncStorage.getItem(nameStorage).then( async (data: any) => {
+            data = JSON.parse(data);
+            data = newObject;            
+            await AsyncStorage.setItem(nameStorage, JSON.stringify(data));            
+        })   
+        let result: any = await AsyncStorage.getItem(nameStorage);     
+        return JSON.parse(result);
     }
 
     static remove: any = async (nameStorage: string) => {

@@ -2,10 +2,10 @@ import React from 'react'
 import { createAppContainer, createSwitchNavigator } from 'react-navigation'
 import { createStackNavigator } from 'react-navigation-stack'
 import { createDrawerNavigator } from 'react-navigation-drawer'
-import { Login, Register, FormQuestion, Reload } from './src/screens'
+import { Login, Register, FormQuestion, Sync } from './src/screens'
 import { Icon } from 'react-native-elements';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { faDoorOpen, faBuilding } from '@fortawesome/free-solid-svg-icons'
+import { faDoorOpen, faBuilding, faSync } from '@fortawesome/free-solid-svg-icons'
 
 const LoginStackNavigator = createStackNavigator({
   Login: {
@@ -16,7 +16,6 @@ const LoginStackNavigator = createStackNavigator({
   }
 })
 
-// TODO: Talvez utilizar dentro do component FormQuestion
 const FormQuestionStackNavigator = createStackNavigator({
   FormQuestion: {
     screen: FormQuestion,
@@ -62,7 +61,42 @@ const RegisterStackNavigator = createStackNavigator({
   }
 })
 
-const AppDrawerNavigator = createDrawerNavigator({  
+const SyncStackNavigator = createStackNavigator({
+  Sync: {
+    screen: Sync,
+    navigationOptions: ({ navigation }) => ({
+      title: 'Sincronizar',
+      headerTitleStyle: {
+        fontWeight: 'bold',
+        alignSelf: 'center',
+        textAlign: 'center',
+      },
+      headerTintColor: '#008030',
+      headerLeft: <Icon
+        name='navicon'
+        type='evilicon'
+        color='green'
+        size={60}
+        onPress={() => navigation.openDrawer()}
+      />
+    })
+  }
+})
+
+const AppDrawerNavigator = createDrawerNavigator({
+  Login: {
+    screen: LoginStackNavigator,
+    navigationOptions: {
+      drawerLabel: 'Logout',
+      drawerIcon: (
+        <FontAwesomeIcon
+          icon={faDoorOpen}
+          color='green'
+          size={20}
+        />
+      )
+    }
+  },
   Register: {
     screen: RegisterStackNavigator,
     navigationOptions: {
@@ -74,15 +108,15 @@ const AppDrawerNavigator = createDrawerNavigator({
           size={20}
         />
       )
-    }
+    }    
   },
-  Login: {
-    screen: LoginStackNavigator,
+  Sync: {
+    screen: SyncStackNavigator,
     navigationOptions: {
-      drawerLabel: 'Logout',
+      drawerLabel: 'Sincronizar',
       drawerIcon: (
         <FontAwesomeIcon
-          icon={faDoorOpen}
+          icon={faSync}
           color='green'
           size={20}
         />
@@ -104,41 +138,3 @@ const AppSwitchNavigator = createSwitchNavigator({
 const AppContainer = createAppContainer(AppSwitchNavigator);
 
 export default AppContainer;
-
-
-
-// const App = createAppContainer(
-//   createStackNavigator({
-//     Login: {
-//       screen: Login,
-//       navigationOptions: () => ({
-//         header: null, // not showing header on component        
-//       })
-//     },
-//     Register: {
-//       screen: Register,
-//       navigationOptions: () => ({
-//         title: 'Registro Empresa',
-//         headerLeft: null,
-//         headerTitleStyle: {
-//           fontWeight: 'bold',
-//           alignSelf: 'center',
-//           textAlign: 'center',
-//         },
-//         headerTintColor: '#008030'
-//       })
-//     },
-//     FormQuestion: {
-//       screen: FormQuestion,
-//       navigationOptions: () => ({
-//         title: 'Questionário',
-//         headerTitleStyle: {
-//           fontWeight: 'bold'
-//         },
-//         headerTintColor: '#008030'
-//       })
-//     },
-//   })
-// )
-
-// export default App;

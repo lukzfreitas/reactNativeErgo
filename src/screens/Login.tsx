@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { View, TextInput, StyleSheet, Image, TouchableOpacity, Text } from 'react-native';
+import { View, TextInput, StyleSheet, Image, TouchableOpacity, Text, BackHandler } from 'react-native';
 import { NavigationScreenProp, NavigationState, NavigationParams } from 'react-navigation';
 import { If } from '../commons';
 import {
@@ -21,9 +21,19 @@ interface State {
 
 export class Login extends Component<Props, State> {
 
+    backHandler: any;
+
     constructor(props: Props) {
         super(props);
         this.state = { username: '', password: '', userInvalid: false };
+    }
+
+    componentDidMount = () => {
+        this.backHandler = BackHandler.addEventListener('hardwareBackPress', () => { return true })
+    }
+
+    componentWillUnmount = () => {
+        this.backHandler.remove();
     }
 
 
@@ -81,33 +91,36 @@ const style = StyleSheet.create({
     },
     logo: {        
         alignSelf: 'center',
-        width: wp('80%'),
-        height: hp('20%'),
+        width: wp('70%'),
+        height: hp('15%'),
         resizeMode: 'stretch',        
+        marginVertical: 30
     },
     input: {
-        width: wp('80%'),        
-        marginTop: 10,
+        width: wp('80%'),         
+        marginVertical: 20,
         textAlignVertical: 'center'
     },
-    button: {
+    button: {        
         backgroundColor: '#008030',
         paddingBottom: 10,
-        paddingTop: 10,
+        paddingTop: 5,
         borderRadius: 10,
         shadowOpacity: 0.9,
         marginVertical: 10,
+        alignSelf: 'center',
         width: wp('20%'),
-        height: hp('6%'),
-        justifyContent: 'center',
-        alignItems: 'center'
+        height: hp('5%')
 
     },
     textButton: {
+        flex: 1,
         color: 'white',
-        textAlignVertical: 'center',
-        textAlign: 'center',
-        fontSize: 20
+        textAlignVertical: 'center',                
+        alignSelf: 'center',
+        alignContent: 'center',
+        textAlign: 'center',        
+        fontSize: 20        
     },
     userInvalid: {
         color: 'red'

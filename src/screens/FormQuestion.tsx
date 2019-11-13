@@ -1,10 +1,8 @@
 import React, { Component } from 'react';
 import { NavigationScreenProp, NavigationState, NavigationParams } from 'react-navigation';
-import { HeaderBackButton } from 'react-navigation-stack'
 import { QuestionScaleLikert, QuestionDefault } from '../components';
 import { RealmService, AsyncStorageService } from '../services';
-import {
-    BackHandler,
+import {    
     SafeAreaView,
     Text,
     FlatList,
@@ -14,7 +12,8 @@ import {
     Alert,
     ToastAndroid,
     ActivityIndicator,
-    Switch
+    Switch,
+    DeviceEventEmitter
 } from 'react-native';
 import {
     widthPercentageToDP as wp,
@@ -39,12 +38,14 @@ interface State {
     questionsDefault: boolean;
     loading: boolean;
     textLoading: string;
-    backHandler: any;
 }
 
-export class FormQuestion extends Component<Props, State> {
+export class FormQuestion extends Component<Props, State> {    
+    
+    eventEmitter: any;
+
     constructor(props: Props) {
-        super(props);        
+        super(props);
         this.state = {
             cnpj: '',
             razaoSocial: '',
@@ -54,8 +55,7 @@ export class FormQuestion extends Component<Props, State> {
             questions: new Map(),
             questionsDefault: true,
             loading: false,
-            textLoading: '',
-            backHandler: null,
+            textLoading: ''
         };
         this.submit = this.submit.bind(this);
     }
@@ -68,47 +68,42 @@ export class FormQuestion extends Component<Props, State> {
         this.state.questionsData.map((question: any) => {
             questions.set(question.id, question);
         })
-        const empresaStorage = await AsyncStorageService.getItem('empresa');                
+        let empresa = await AsyncStorageService.getItem('empresa');
+        console.log('empresa', empresa);
         this.setState({
-            cnpj: empresaStorage.cnpj,
-            razaoSocial: empresaStorage.razaoSocial,
-            setor: empresaStorage.setor,
-            mes: empresaStorage.mes,
+            cnpj: empresa.cnpj,
+            razaoSocial: empresa.razaoSocial,
+            setor: empresa.setor,
+            questionsData,
+            questions            
+        });
+        this.eventEmitter = DeviceEventEmitter.addListener('eventKey', this.setFormQuestions);
+    }
+
+    setFormQuestions = (empresa: any) => {
+        if (this.state.cnpj == '') {
+            return;
+        }
+        let questionsData = this.state.questionsData.map((question: any) => {
+            return { ...question, option: '0', sliderColor: 'gray' };
+        })
+        let questions: any = this.state.questions;
+        this.state.questionsData.map((question: any) => {
+            questions.set(question.id, question);
+        })
+        this.setState({
+            cnpj: empresa.cnpj,
+            razaoSocial: empresa.razaoSocial,
+            setor: empresa.setor,
             questionsData,
             questions,
-            backHandler: BackHandler.addEventListener('hardwareBackPress', () => {
-                console.log('sair');
-                Alert.alert(
-                    'As questões respondidas não serão salvas',
-                    'Você deseja realmente sair?',
-                    [
-                        { text: 'Cancelar', onPress: () => console.log('cancelar') },
-                        { text: 'Sair', onPress: () => this.props.navigation.navigate('Register') }
-                    ]
-                );
-                return true;
-            })
-        });
+            questionsDefault: true,
+        })
     }
 
-    componentWillUnmount() {
-        this.state.backHandler.remove();
-    }
-
-    // public static navigationOptions = ({ navigation }: any) => {
-    //     return {
-    //         headerLeft: <HeaderBackButton onPress={() => {
-    //             Alert.alert(
-    //                 'As questões respondidas não serão salvas',
-    //                 'Você deseja realmente sair?',
-    //                 [
-    //                     { text: 'Cancelar', onPress: () => console.log('cancelar') },
-    //                     { text: 'Sair', onPress: () => navigation.goBack() }
-    //                 ]
-    //             );
-    //         }} />
-    //     }
-    // }
+    componentWillUnmount() {        
+        this.eventEmitter.remove();
+    }    
 
     onSelect = (item: any, option: string) => {
         let questions: any = this.state.questions;

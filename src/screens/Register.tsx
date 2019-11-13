@@ -1,5 +1,13 @@
 import React, { Component } from 'react';
-import { StyleSheet, TextInput, ScrollView, TouchableOpacity, Text } from 'react-native';
+import {
+    StyleSheet,
+    TextInput,
+    ScrollView,
+    TouchableOpacity,
+    Text,
+    ActivityIndicator,    
+    DeviceEventEmitter
+} from 'react-native';
 import { TextInputMask } from 'react-native-masked-text';
 import { NavigationScreenProp, NavigationState, NavigationParams } from 'react-navigation';
 import DateTimePicker from '@react-native-community/datetimepicker';
@@ -26,9 +34,12 @@ interface State {
     invalidSetor: boolean;
     dateQuestion: any;
     empresaExist: boolean;
+    loading: boolean;    
 }
 
 export class Register extends Component<Props, State> {
+    
+    eventEmitter: any;
 
     constructor(props: Props) {
         super(props);
@@ -40,8 +51,11 @@ export class Register extends Component<Props, State> {
             empresaExist: false,
             invalidSetor: false,
             dateQuestion: { date: new Date(), mode: 'date', show: false },
+            loading: false
         };
-    }
+        AsyncStorageService.saveItem('empresa', {});
+    }   
+    
 
     openDatePicker = () => {
         this.setState(state => { return { ...state, dateQuestion: { ...state.dateQuestion, show: true, } } })
@@ -53,7 +67,7 @@ export class Register extends Component<Props, State> {
             date = new Date(value.nativeEvent.timestamp);
         }
         this.setState(state => { return { ...state, dateQuestion: { ...state.dateQuestion, date: date, show: false } } });
-    }
+    }    
 
     isValidForm = () => {
         let invalid: boolean = true;
@@ -74,17 +88,18 @@ export class Register extends Component<Props, State> {
 
     save = async () => {
         if (this.isValidForm()) {
+            this.setState({ loading: true });
             const empresaSchema = { cnpj: this.state.empresa.cnpj, nome: this.state.empresa.razaoSocial, setor: this.state.setor };
             const empresaStorage = {
                 cnpj: this.state.empresa.cnpj,
                 razaoSocial: this.state.empresa.razaoSocial,
                 setor: this.state.setor,
-                mes: this.state.dateQuestion.date.getMonth() + 1 + '/' + this.state.dateQuestion.date.getFullYear(),
             }
             await this.saveEmpresa(empresaSchema);
-            await AsyncStorageService.saveItem('empresa', empresaStorage);
+            let empresaUpdate = await AsyncStorageService.updateItem('empresa', empresaStorage);            
+            DeviceEventEmitter.emit('eventKey', empresaUpdate);
             this.props.navigation.navigate('FormQuestion');
-            this.setState(state => { return { ...state, empresa: { ...state.empresa, razaoSocial: '', cnpj: '' }, setor: '', empresaExist: false } });
+            this.setState({ loading: false });
         }
     }
 
@@ -117,65 +132,76 @@ export class Register extends Component<Props, State> {
     }
 
     render() {
-        const { empresa, invalidCnpj, invalidRazaoSocial, setor, invalidSetor, dateQuestion } = this.state;
+
+        const { empresa, invalidCnpj, invalidRazaoSocial, setor, invalidSetor, dateQuestion, loading } = this.state;
         return (
             <ScrollView style={style.screen}>
-                <TextInputMask
-                    type={'cnpj'}
-                    style={style.textInput}
-                    value={empresa.cnpj}
-                    underlineColorAndroid={invalidCnpj ? 'red' : '#008030'}
-                    placeholder={invalidCnpj ? 'CNPJ não informado' : 'Informe o CNPJ'}
-                    placeholderTextColor={invalidCnpj ? 'red' : '#008030'}
-                    onChangeText={text => this.setState(state => { return { ...state, empresa: { ...state.empresa, cnpj: text } } })}
-                    onChange={() => this.setState({ invalidCnpj: false })}
-                    onBlur={() => this.findEmpresa()}
-                />
-                <TextInput
-                    style={style.textInput}
-                    value={empresa.razaoSocial}
-                    underlineColorAndroid={invalidRazaoSocial ? 'red' : '#008030'}
-                    placeholder={invalidRazaoSocial ? 'Razão social não informada' : 'Informe a razão social'}
-                    placeholderTextColor={invalidRazaoSocial ? 'red' : '#008030'}
-                    onChangeText={text => this.setState(state => { return { ...state, empresa: { ...state.empresa, razaoSocial: text } } })}
-                    onChange={() => this.setState({ invalidRazaoSocial: false })}
-                />
-                <TextInput
-                    style={style.textInput}
-                    value={setor}
-                    underlineColorAndroid={invalidSetor ? 'red' : '#008030'}
-                    placeholder={invalidSetor ? 'Setor não informado' : 'Informe o setor'}
-                    placeholderTextColor={invalidCnpj ? 'red' : '#008030'}
-                    onChangeText={text => this.setState({ setor: text })}
-                    onChange={() => this.setState({ invalidSetor: false })}
-                />
-                <FontAwesomeIcon
-                    icon={faCalendarAlt}
-                    style={style.calendar}
-                    color='green'
-                    size={60}
-                    onPress={() => this.openDatePicker()}
-                />
-                <TextInput
-                    style={style.textInput}
-                    value={dateQuestion.date.getMonth() + 1 + '/' + dateQuestion.date.getFullYear() + ' - Data do questionário '}
-                    underlineColorAndroid='#008030'
-                    placeholder='Selecione a data'
-                    editable={true}
-                    onFocus={() => this.openDatePicker()}
-                />
-                <If condition={dateQuestion.show}>
-                    <DateTimePicker
-                        value={dateQuestion.date}
-                        mode={dateQuestion.mode}
-                        is24Hour={true}
-                        display="default"
-                        locale="pt-BR"
-                        onChange={(value) => this.setDate(value)} />
+                <If condition={loading}>
+                    <ActivityIndicator
+                        style={{ height: 100 }}
+                        color="#48bb94"
+                        size="large"
+                    />
+                    <Text style={style.textLoading}> Carregando Questionários... </Text>
                 </If>
-                <TouchableOpacity style={style.button} onPress={() => this.save()}>
-                    <Text style={style.textButton}>Cadastrar</Text>
-                </TouchableOpacity>
+                <If condition={!loading}>
+                    <TextInputMask
+                        type={'cnpj'}
+                        style={style.textInput}
+                        value={empresa.cnpj}
+                        underlineColorAndroid={invalidCnpj ? 'red' : '#008030'}
+                        placeholder={invalidCnpj ? 'CNPJ não informado' : 'Informe o CNPJ'}
+                        placeholderTextColor={invalidCnpj ? 'red' : '#008030'}
+                        onChangeText={text => this.setState(state => { return { ...state, empresa: { ...state.empresa, cnpj: text } } })}
+                        onChange={() => this.setState({ invalidCnpj: false })}
+                        onBlur={() => this.findEmpresa()}
+                    />
+                    <TextInput
+                        style={style.textInput}
+                        value={empresa.razaoSocial}
+                        underlineColorAndroid={invalidRazaoSocial ? 'red' : '#008030'}
+                        placeholder={invalidRazaoSocial ? 'Razão social não informada' : 'Informe a razão social'}
+                        placeholderTextColor={invalidRazaoSocial ? 'red' : '#008030'}
+                        onChangeText={text => this.setState(state => { return { ...state, empresa: { ...state.empresa, razaoSocial: text } } })}
+                        onChange={() => this.setState({ invalidRazaoSocial: false })}
+                    />
+                    <TextInput
+                        style={style.textInput}
+                        value={setor}
+                        underlineColorAndroid={invalidSetor ? 'red' : '#008030'}
+                        placeholder={invalidSetor ? 'Setor não informado' : 'Informe o setor'}
+                        placeholderTextColor={invalidCnpj ? 'red' : '#008030'}
+                        onChangeText={text => this.setState({ setor: text })}
+                        onChange={() => this.setState({ invalidSetor: false })}
+                    />
+                    <FontAwesomeIcon
+                        icon={faCalendarAlt}
+                        style={style.calendar}
+                        color='green'
+                        size={60}
+                        onPress={() => this.openDatePicker()}
+                    />
+                    <TextInput
+                        style={style.textInput}
+                        value={dateQuestion.date.getMonth() + 1 + '/' + dateQuestion.date.getFullYear() + ' - Data do questionário '}
+                        underlineColorAndroid='#008030'
+                        placeholder='Selecione a data'
+                        editable={true}
+                        onFocus={() => this.openDatePicker()}
+                    />
+                    <If condition={dateQuestion.show}>
+                        <DateTimePicker
+                            value={dateQuestion.date}
+                            mode={dateQuestion.mode}
+                            is24Hour={true}
+                            display="default"
+                            locale="pt-BR"
+                            onChange={(value) => this.setDate(value)} />
+                    </If>
+                    <TouchableOpacity style={style.button} onPress={() => this.save()}>
+                        <Text style={style.textButton}>Cadastrar</Text>
+                    </TouchableOpacity>
+                </If>
             </ScrollView>
         )
     }
@@ -215,6 +241,15 @@ const style = StyleSheet.create({
         alignSelf: 'center',
         textAlign: 'center',
         fontSize: 20
+    },
+    textLoading: {
+        alignItems: 'center',
+        alignContent: 'center',
+        alignSelf: 'center',
+        margin: 10,
+        fontSize: 30,
+        color: 'green',
+        fontWeight: 'bold'
     }
 })
 
