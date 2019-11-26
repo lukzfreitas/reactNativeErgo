@@ -11,6 +11,7 @@ import {
     removeOrientationListener as rol
 } from 'react-native-responsive-screen';
 
+
 interface Props {
     item: any;
     onSelect: any;
@@ -29,7 +30,7 @@ export class QuestionScaleLikert extends PureComponent<Props, State> {
     }
 
     getScreenInfo = () => {
-        const dim = Dimensions.get('window');
+        const dim = Dimensions.get('window');        
         return dim;
     }
 
@@ -83,7 +84,10 @@ export class QuestionScaleLikert extends PureComponent<Props, State> {
                             onPress={() => { onSelect(item, '1'); this.changeQuestion('1') }}
                         />
                         <If condition={this.getScreenInfo().width > 360}>
-                            <Text style={style.textSmile}>Discordo{"\n"}Totalmente</Text>
+                            <Text
+                                style={style.textSmile}
+                                onPress={() => { onSelect(item, '1'); this.changeQuestion('1') }}
+                            >Discordo{"\n"}Totalmente</Text>
                         </If>
                     </View>
 
@@ -96,7 +100,10 @@ export class QuestionScaleLikert extends PureComponent<Props, State> {
                             onPress={() => { onSelect(item, '2'); this.changeQuestion('2') }}
                         />
                         <If condition={this.getScreenInfo().width > 360}>
-                            <Text style={style.textSmile}>Discordo{"\n"}Parcialmente</Text>
+                            <Text
+                                style={style.textSmile}
+                                onPress={() => { onSelect(item, '2'); this.changeQuestion('2') }}
+                            >Discordo{"\n"}Parcialmente</Text>
                         </If>
                     </View>
 
@@ -109,7 +116,9 @@ export class QuestionScaleLikert extends PureComponent<Props, State> {
                             onPress={() => { onSelect(item, '3'); this.changeQuestion('3') }}
                         />
                         <If condition={this.getScreenInfo().width > 360}>
-                            <Text style={style.textSmile}>Indiferente{"\n"}</Text>
+                            <Text
+                                style={style.textSmile}
+                                onPress={() => { onSelect(item, '3'); this.changeQuestion('3') }}>Indiferente{"\n"}</Text>
                         </If>
                     </View>
 
@@ -122,7 +131,10 @@ export class QuestionScaleLikert extends PureComponent<Props, State> {
                             onPress={() => { onSelect(item, '4'); this.changeQuestion('4') }}
                         />
                         <If condition={this.getScreenInfo().width > 360}>
-                            <Text style={style.textSmile}>Condordo{"\n"}Parcialmente</Text>
+                            <Text
+                                style={style.textSmile}
+                                onPress={() => { onSelect(item, '4'); this.changeQuestion('4') }}
+                            >Condordo{"\n"}Parcialmente</Text>
                         </If>
                     </View>
 
@@ -135,7 +147,10 @@ export class QuestionScaleLikert extends PureComponent<Props, State> {
                             onPress={() => { onSelect(item, '5'); this.changeQuestion('5') }}
                         />
                         <If condition={this.getScreenInfo().width > 360}>
-                            <Text style={style.textSmile}>Condordo{"\n"}Totalmente</Text>
+                            <Text
+                                style={style.textSmile}
+                                onPress={() => { onSelect(item, '5'); this.changeQuestion('5') }}
+                            >Condordo{"\n"}Totalmente</Text>
                         </If>
                     </View>
                 </View>
@@ -169,7 +184,7 @@ const style = StyleSheet.create({
         fontSize: 1
     },
     smileLandscape: {
-        marginHorizontal: wp('3.6%'),
+        marginHorizontal: wp('3.4%'),
         marginVertical: 10,
         alignSelf: 'center'
     },

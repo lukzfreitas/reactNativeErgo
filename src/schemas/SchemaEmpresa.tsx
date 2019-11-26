@@ -2,10 +2,11 @@ export class SchemaEmpresa {
     static schema = {
         name: 'EmpresaSchema',
         primaryKey: 'cnpj',
-        properties: {            
+        properties: {       
+            id: { type: 'int?' },     
+            idRegional: { type: 'int?' },
             cnpj: { type: 'string' },
-            nome: { type: 'string' },
-            setores: { type: 'string[]' }
+            razaoSocial: { type: 'string' }
         }
     }
 }

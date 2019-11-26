@@ -1,9 +1,10 @@
 import React from 'react'
-import { createAppContainer, createSwitchNavigator } from 'react-navigation'
+import { createAppContainer, createSwitchNavigator, ScrollView } from 'react-navigation'
 import { createStackNavigator } from 'react-navigation-stack'
-import { createDrawerNavigator } from 'react-navigation-drawer'
-import { Login, Register, FormQuestion, Sync } from './src/screens'
+import { createDrawerNavigator, DrawerItems } from 'react-navigation-drawer'
+import { Login, Register, FormQuestion, Sync, DialogMessage } from './src/screens'
 import { Icon } from 'react-native-elements';
+import { Dialog, Paragraph, TextInput, Button } from 'react-native-paper'
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faDoorOpen, faBuilding, faSync } from '@fortawesome/free-solid-svg-icons'
 
@@ -84,19 +85,6 @@ const SyncStackNavigator = createStackNavigator({
 })
 
 const AppDrawerNavigator = createDrawerNavigator({
-  Login: {
-    screen: LoginStackNavigator,
-    navigationOptions: {
-      drawerLabel: 'Logout',
-      drawerIcon: (
-        <FontAwesomeIcon
-          icon={faDoorOpen}
-          color='green'
-          size={20}
-        />
-      )
-    }
-  },
   Register: {
     screen: RegisterStackNavigator,
     navigationOptions: {
@@ -108,7 +96,7 @@ const AppDrawerNavigator = createDrawerNavigator({
           size={20}
         />
       )
-    }    
+    }
   },
   Sync: {
     screen: SyncStackNavigator,
@@ -128,7 +116,33 @@ const AppDrawerNavigator = createDrawerNavigator({
     navigationOptions: {
       drawerLabel: () => null
     }
-  }
+  },
+  Login: {
+    screen: LoginStackNavigator,
+    navigationOptions: {
+      drawerLabel: 'Logout',
+      drawerIcon: (
+        <FontAwesomeIcon
+          icon={faDoorOpen}
+          color='green'
+          size={20}
+        />
+      )
+    }
+  },
+}, {
+  initialRouteName: 'Login',
+  contentComponent: (props) => (
+    <ScrollView>
+      <DrawerItems
+        {...props}
+        onItemPress={(item: any) => (
+          props.navigation.navigate(item.route.routeName)
+        )
+      }
+    />
+    </ScrollView>
+  )
 })
 
 const AppSwitchNavigator = createSwitchNavigator({

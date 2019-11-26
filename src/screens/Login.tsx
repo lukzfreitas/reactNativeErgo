@@ -38,7 +38,7 @@ export class Login extends Component<Props, State> {
 
 
     validUser() {
-        if (this.state.username == '' || this.state.password == '') {
+        if (this.state.username !== 'ginfo.labs' || this.state.password !== 'sistemas01') {
             this.setState({ username: '', password: '', userInvalid: true });
         } else {
             this.setState({ username: '', password: '', userInvalid: false });
@@ -72,7 +72,7 @@ export class Login extends Component<Props, State> {
                     onChange={() => this.setState({ userInvalid: false })}
                 />
                 <If condition={this.state.userInvalid}>
-                    <Text style={style.userInvalid}> Usuário ou senha não informados </Text>
+                    <Text style={style.userInvalid}> Usuário ou senha inválidos </Text>
                 </If>
                 <TouchableOpacity style={style.button} onPress={() => this.validUser()}>
                     <Text style={style.textButton}>Entrar</Text>
@@ -93,12 +93,13 @@ const style = StyleSheet.create({
         alignSelf: 'center',
         width: wp('70%'),
         height: hp('15%'),
-        resizeMode: 'stretch',        
-        marginVertical: 30
+        resizeMode: 'stretch',  
+        marginBottom: hp('2%'),      
+        marginTop: hp('5%')
     },
     input: {
         width: wp('80%'),         
-        marginVertical: 20,
+        marginVertical: hp('2%'),
         textAlignVertical: 'center'
     },
     button: {        
@@ -107,10 +108,10 @@ const style = StyleSheet.create({
         paddingTop: 5,
         borderRadius: 10,
         shadowOpacity: 0.9,
-        marginVertical: 10,
+        marginVertical: hp('2%'),
         alignSelf: 'center',
-        width: wp('20%'),
-        height: hp('5%')
+        width: wp('25%'),
+        height: hp('6%')
 
     },
     textButton: {

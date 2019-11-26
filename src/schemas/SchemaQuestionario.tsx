@@ -1,16 +1,17 @@
 export class SchemaQuestionario {
     static schema = {
-        name: 'QuestionarioSchema',        
-        properties: {            
-            q1: { type: 'int' },
-            q2: { type: 'int' },
-            q3: { type: 'int' },
-            q4: { type: 'int' },
-            q5: { type: 'int' },
-            q6: { type: 'int' },
-            q7: { type: 'int' },
-            q8: { type: 'int' },
-            q9: { type: 'int' },
+        name: 'QuestionarioSchema',
+        properties: {
+            dataQuestionario: { type: 'int' },
+            q01: { type: 'int' },
+            q02: { type: 'int' },
+            q03: { type: 'int' },
+            q04: { type: 'int' },
+            q05: { type: 'int' },
+            q06: { type: 'int' },
+            q07: { type: 'int' },
+            q08: { type: 'int' },
+            q09: { type: 'int' },
             q10: { type: 'int' },
             q11: { type: 'int' },
             q12: { type: 'int' },
@@ -37,9 +38,8 @@ export class SchemaQuestionario {
             q33: { type: 'int' },
             q34: { type: 'int' },
             q35: { type: 'int' },
-            cnpj: { type: 'string' },
-            setor: { type: 'string' },
-            mes: { type: 'string' },
+            setor: { type: 'SetorSchema?' },
+            id: { type: 'int?' }
         }
     }
 }

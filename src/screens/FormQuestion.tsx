@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { NavigationScreenProp, NavigationState, NavigationParams } from 'react-navigation';
 import { QuestionScaleLikert, QuestionDefault } from '../components';
 import { RealmService, AsyncStorageService } from '../services';
-import {    
+import {
     SafeAreaView,
     Text,
     FlatList,
@@ -40,8 +40,8 @@ interface State {
     textLoading: string;
 }
 
-export class FormQuestion extends Component<Props, State> {    
-    
+export class FormQuestion extends Component<Props, State> {
+
     eventEmitter: any;
 
     constructor(props: Props) {
@@ -69,13 +69,12 @@ export class FormQuestion extends Component<Props, State> {
             questions.set(question.id, question);
         })
         let empresa = await AsyncStorageService.getItem('empresa');
-        console.log('empresa', empresa);
         this.setState({
             cnpj: empresa.cnpj,
             razaoSocial: empresa.razaoSocial,
             setor: empresa.setor,
             questionsData,
-            questions            
+            questions
         });
         this.eventEmitter = DeviceEventEmitter.addListener('eventKey', this.setFormQuestions);
     }
@@ -101,9 +100,9 @@ export class FormQuestion extends Component<Props, State> {
         })
     }
 
-    componentWillUnmount() {        
+    componentWillUnmount() {
         this.eventEmitter.remove();
-    }    
+    }
 
     onSelect = (item: any, option: string) => {
         let questions: any = this.state.questions;
@@ -142,13 +141,21 @@ export class FormQuestion extends Component<Props, State> {
     private saveQuestions = async () => {
         this.setState({ loading: true, textLoading: 'Salvando Questionário...' });
         let questionsSchema = this.state.questionsData.reduce((object: any, question: any) => {
-            object['q' + question.id] = parseInt(question.option);
+            let nameQuestion = question.id < 10 ? '0' + question.id : question.id;
+            object['q' + nameQuestion] = parseInt(question.option);
             return object;
-        }, {});
+        }, {});        
+        questionsSchema.setor = {
+            nome: this.state.setor,
+            empresa: {
+                id: 0, // TODO:  implementar
+                idRegional: 0, // TODO: implementar
+                cnpj: this.state.cnpj,
+                razaoSocial: this.state.razaoSocial
+            }
+        };
+        questionsSchema.dataQuestionario = this.state.mes;
 
-        questionsSchema.cnpj = this.state.cnpj;
-        questionsSchema.setor = this.state.setor;
-        questionsSchema.mes = this.state.mes;
         const realm = await RealmService.getRealm();
         try {
             realm.write(() => {
@@ -211,7 +218,6 @@ export class FormQuestion extends Component<Props, State> {
                         />
                         <Text style={style.textQuestionLikert}> Questionário Escala Likert </Text>
                     </View>
-
                 </View>
                 <View style={style.contentList}>
                     <If condition={loading}>
@@ -276,19 +282,19 @@ const style = StyleSheet.create({
         flexDirection: 'column'
     },
     header: {
-        flex: 1,
-        alignItems: 'center'
+        flex: 1.5,
+        alignItems: 'center',
     },
     switch: {
-        flex: 1,
+        flex: 3,
         flexDirection: 'row'
     },
     textQuestionDefault: {
         alignItems: 'center',
         alignContent: 'center',
         alignSelf: 'center',
-        margin: 20,
-        fontSize: 20,
+        margin: wp('2%'),
+        fontSize: hp('2.2%'),
         color: 'gray',
         fontWeight: 'bold'
     },
@@ -296,8 +302,8 @@ const style = StyleSheet.create({
         alignItems: 'center',
         alignContent: 'center',
         alignSelf: 'center',
-        margin: 20,
-        fontSize: 20,
+        margin: wp('2%'),
+        fontSize: hp('2.2%'),
         color: 'green',
         fontWeight: 'bold'
     },
@@ -306,19 +312,18 @@ const style = StyleSheet.create({
         alignContent: 'center',
         alignSelf: 'center',
         margin: 10,
-        fontSize: 30,
+        fontSize: hp('3.5%'),
         color: 'green',
         fontWeight: 'bold'
     },
     titleRazaoSocial: {
         alignSelf: 'center',
-        fontSize: 30,
+        fontSize: hp('3%'),
         fontWeight: 'bold'
     },
     titleCnpj: {
-        alignSelf: 'center',
-        fontSize: 20,
-        fontWeight: 'bold'
+        alignSelf: 'center',        
+        fontWeight: 'bold',
     },
     titleSetor: {
         alignSelf: 'center',

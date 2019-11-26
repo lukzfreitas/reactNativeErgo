@@ -5,7 +5,7 @@ import {
     ScrollView,
     TouchableOpacity,
     Text,
-    ActivityIndicator,    
+    ActivityIndicator,
     DeviceEventEmitter
 } from 'react-native';
 import { TextInputMask } from 'react-native-masked-text';
@@ -15,6 +15,7 @@ import { If } from '../commons';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faCalendarAlt } from '@fortawesome/free-regular-svg-icons';
 import { RealmService, AsyncStorageService } from '../services'
+import { NavigationEvents } from 'react-navigation';
 import {
     widthPercentageToDP as wp,
     heightPercentageToDP as hp,
@@ -33,12 +34,11 @@ interface State {
     setor: string;
     invalidSetor: boolean;
     dateQuestion: any;
-    empresaExist: boolean;
-    loading: boolean;    
+    loading: boolean;
 }
 
 export class Register extends Component<Props, State> {
-    
+
     eventEmitter: any;
 
     constructor(props: Props) {
@@ -48,14 +48,12 @@ export class Register extends Component<Props, State> {
             invalidCnpj: false,
             invalidRazaoSocial: false,
             setor: '',
-            empresaExist: false,
             invalidSetor: false,
             dateQuestion: { date: new Date(), mode: 'date', show: false },
             loading: false
         };
         AsyncStorageService.saveItem('empresa', {});
-    }   
-    
+    }
 
     openDatePicker = () => {
         this.setState(state => { return { ...state, dateQuestion: { ...state.dateQuestion, show: true, } } })
@@ -67,7 +65,7 @@ export class Register extends Component<Props, State> {
             date = new Date(value.nativeEvent.timestamp);
         }
         this.setState(state => { return { ...state, dateQuestion: { ...state.dateQuestion, date: date, show: false } } });
-    }    
+    }
 
     isValidForm = () => {
         let invalid: boolean = true;
@@ -89,14 +87,27 @@ export class Register extends Component<Props, State> {
     save = async () => {
         if (this.isValidForm()) {
             this.setState({ loading: true });
-            const empresaSchema = { cnpj: this.state.empresa.cnpj, nome: this.state.empresa.razaoSocial, setor: this.state.setor };
+            const empresaSchema = { cnpj: this.state.empresa.cnpj, razaoSocial: this.state.empresa.razaoSocial, setor: this.state.setor };
             const empresaStorage = {
                 cnpj: this.state.empresa.cnpj,
                 razaoSocial: this.state.empresa.razaoSocial,
                 setor: this.state.setor,
-            }
+                idRegional: 1 // TODO: Alterar 
+            }            
             await this.saveEmpresa(empresaSchema);
-            let empresaUpdate = await AsyncStorageService.updateItem('empresa', empresaStorage);            
+            async function loadEmpresas(cnpj: string) {
+                const realm = await RealmService.getRealm();
+                return realm.objects('EmpresaSchema').filtered("cnpj = " + `'${cnpj}'`);
+            }
+            let empresaFound = await loadEmpresas(this.state.empresa.cnpj);
+            const setorStorage = {
+                nome: this.state.setor,
+                empresa: empresaFound[0]
+            }
+            this.saveSetor(setorStorage)
+
+            let empresaUpdate = await AsyncStorageService.updateItem('empresa', empresaStorage);
+
             DeviceEventEmitter.emit('eventKey', empresaUpdate);
             this.props.navigation.navigate('FormQuestion');
             this.setState({ loading: false });
@@ -105,17 +116,23 @@ export class Register extends Component<Props, State> {
 
     saveEmpresa = async (empresaSchema: any) => {
         const realm = await RealmService.getRealm();
-        if (!this.state.empresaExist) {
+        if (this.empresaExists()) {
             realm.write(() => {
-                let empresa: any = realm.create('EmpresaSchema', empresaSchema);
-                empresa.setores.push(empresaSchema.setor);
+                realm.create('EmpresaSchema', empresaSchema, true);
+                
             });
         } else {
             realm.write(() => {
-                let empresa: any = realm.create('EmpresaSchema', empresaSchema, true);
-                empresa.setores.push(empresaSchema.setor);
-            })
+                realm.create('EmpresaSchema', empresaSchema);                
+            });
         }
+    }
+
+    saveSetor = async (setorSchema: any) => {
+        const realm = await RealmService.getRealm();
+        realm.write(() => {
+            let setor: any = realm.create('SetorSchema', setorSchema);
+        });
     }
 
     findEmpresa = async () => {
@@ -123,19 +140,38 @@ export class Register extends Component<Props, State> {
             const realm = await RealmService.getRealm();
             return realm.objects('EmpresaSchema').filtered("cnpj = " + `'${cnpj}'`);
         }
-        let foundEmpresa: any = await loadEmpresas(this.state.empresa.cnpj);
-        if (foundEmpresa.length > 0) {
-            this.setState(state => { return { ...state, empresa: { ...state.empresa, cnpj: foundEmpresa[0].cnpj, razaoSocial: foundEmpresa[0].nome }, empresaExist: true } });
+        let empresaFound: any = await loadEmpresas(this.state.empresa.cnpj);
+        if (empresaFound.length > 0) {
+            this.setState(state => { return { ...state, empresa: { ...state.empresa, cnpj: empresaFound[0].cnpj, razaoSocial: empresaFound[0].razaoSocial } } });
         } else {
-            this.setState(state => { return { ...state, empresa: { ...state.empresa, razaoSocial: '' }, empresaExist: false } });
+            this.setState(state => { return { ...state, empresa: { ...state.empresa, razaoSocial: '' } } });
         }
     }
 
-    render() {
+    empresaExists = async () => {
+        async function loadEmpresas(cnpj: string) {
+            const realm = await RealmService.getRealm();
+            return realm.objects('EmpresaSchema').filtered("cnpj = " + `'${cnpj}'`);
+        }
+        let empresaFound = await loadEmpresas(this.state.empresa.cnpj);
+        empresaFound.length > 0;
+    }
 
+    refresh = async () => {
+        this.setState({
+            empresa: { cnpj: '', razaoSocial: '' },
+            setor: '',
+            dateQuestion: { date: new Date(), mode: 'date', show: false }
+        });
+    }
+
+    render() {
         const { empresa, invalidCnpj, invalidRazaoSocial, setor, invalidSetor, dateQuestion, loading } = this.state;
         return (
             <ScrollView style={style.screen}>
+                <NavigationEvents
+                    onDidFocus={() => this.refresh()}
+                />
                 <If condition={loading}>
                     <ActivityIndicator
                         style={{ height: 100 }}
@@ -231,8 +267,8 @@ const style = StyleSheet.create({
         shadowOpacity: 0.9,
         marginVertical: 10,
         alignSelf: 'center',
-        width: wp('20%'),
-        height: hp('5%')
+        width: wp('28%'),
+        height: hp('6%')
     },
     textButton: {
         flex: 1,
@@ -247,7 +283,7 @@ const style = StyleSheet.create({
         alignContent: 'center',
         alignSelf: 'center',
         margin: 10,
-        fontSize: 30,
+        fontSize: hp('3.5%'),
         color: 'green',
         fontWeight: 'bold'
     }
